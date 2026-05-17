@@ -130,6 +130,47 @@ function todayMask() {
 }
 document.getElementById('sigdate').value = todayMask();
 
+// ── URL PARAM PREFILL ───────────────────────────────────────────
+// Accepts: ?name=John+Smith&dob=01/15/1980&cin=ABC123
+//   Also:  ?fn=John&ln=Smith (explicit first/last)
+// DOB tolerates MM/DD/YYYY, MM-DD-YYYY, YYYY-MM-DD, M/D/YYYY
+function normalizeDob(raw) {
+  const s = String(raw).trim();
+  let m;
+  if ((m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(s))) return s;
+  if ((m = /^(\d{2})-(\d{2})-(\d{4})$/.exec(s))) return `${m[1]}/${m[2]}/${m[3]}`;
+  if ((m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s))) return `${m[2]}/${m[3]}/${m[1]}`;
+  if ((m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(s)))
+    return `${m[1].padStart(2,'0')}/${m[2].padStart(2,'0')}/${m[3]}`;
+  return '';
+}
+
+(function prefillFromUrl() {
+  const p = new URLSearchParams(window.location.search);
+  if (![...p.keys()].length) return;
+
+  const name = (p.get('name') || '').trim();
+  const fn   = (p.get('fn')   || '').trim();
+  const ln   = (p.get('ln')   || '').trim();
+  const dob  = (p.get('dob')  || '').trim();
+  const cin  = (p.get('cin')  || '').trim();
+
+  if (fn || ln) {
+    if (fn) document.getElementById('mfirst').value = fn;
+    if (ln) document.getElementById('mlast').value  = ln;
+  } else if (name) {
+    const parts = name.split(/\s+/);
+    document.getElementById('mfirst').value = parts[0] || '';
+    document.getElementById('mlast').value  = parts.slice(1).join(' ') || '';
+  }
+
+  if (dob) {
+    const norm = normalizeDob(dob);
+    if (norm) document.getElementById('mdob').value = norm;
+  }
+  if (cin) document.getElementById('mcin').value = cin;
+})();
+
 // ── ERROR HANDLING ──────────────────────────────────────────────
 function showErr(msg){const e=document.getElementById('errmsg');e.textContent=msg;e.style.display='block';e.scrollIntoView({behavior:'smooth',block:'center'})}
 function clearErr(){document.getElementById('errmsg').style.display='none'}
