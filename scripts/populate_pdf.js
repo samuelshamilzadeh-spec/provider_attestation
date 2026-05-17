@@ -32,8 +32,14 @@ const SCN_NAME_P1 = { x: 152, y: 747 };
 const SCN_NAME_P2  = { x: 152, y: 747 };
 // Member Name (underline at y≈683)
 const MEMBER_NAME  = { x: 110, y: 685 };
-// Member DOB (same row as Member Name)
-const MEMBER_DOB   = { x: 485, y: 685 };
+// Member DOB — template has three blanks separated by "/" slashes:
+//   MM:   underline x≈422-466 (slash at x≈467)
+//   DD:   underline x≈469-510 (slash at x≈513)
+//   YYYY: underline x≈513-554
+// Positions below center the digits in each blank for Helvetica 10pt.
+const MEMBER_DOB_MM   = { x: 438, y: 685 };
+const MEMBER_DOB_DD   = { x: 484, y: 685 };
+const MEMBER_DOB_YYYY = { x: 522, y: 685 };
 // Member CIN — Client Identification Number (underline at y≈666)
 const MEMBER_CIN   = { x: 252, y: 668 };
 
@@ -149,15 +155,17 @@ async function main() {
   const payload = JSON.parse(Buffer.from(arg, 'base64').toString('utf8'));
   const { memberName, dob, cin, criteria = [], provider, date, signatureDataUrl } = payload;
 
-  // The DOB field on page 2 and the date row on page 3 read more naturally as
-  // MM/DD/YYYY than the ISO strings the frontend sends; the DOB template also
-  // has pre-drawn "/__/__/" separators that line up with US-format dates.
-  const isoToUS = (iso) => {
+  // Frontend sends ISO (YYYY-MM-DD). Split into parts for the DOB template's
+  // three pre-printed blanks, and format the signature date as MM/DD/YYYY.
+  const splitIso = (iso) => {
     const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso || ''));
-    return m ? `${m[2]}/${m[3]}/${m[1]}` : (iso || '');
+    return m ? { mm: m[2], dd: m[3], yyyy: m[1] } : null;
   };
-  const dobStr  = isoToUS(dob);
-  const dateStr = isoToUS(date);
+  const dobParts = splitIso(dob);
+  const dateStr  = (() => {
+    const p = splitIso(date);
+    return p ? `${p.mm}/${p.dd}/${p.yyyy}` : (date || '');
+  })();
 
   const provInfo = PROVIDERS[provider] || { display: provider, npi: '', medicaidId: '' };
 
@@ -178,7 +186,11 @@ async function main() {
   // Page 2 — header + member info
   draw(page2, SCN_NAME_P2,  SCN_LEAD_ENTITY);
   draw(page2, MEMBER_NAME,  memberName);
-  draw(page2, MEMBER_DOB,   dobStr);
+  if (dobParts) {
+    draw(page2, MEMBER_DOB_MM,   dobParts.mm);
+    draw(page2, MEMBER_DOB_DD,   dobParts.dd);
+    draw(page2, MEMBER_DOB_YYYY, dobParts.yyyy);
+  }
   draw(page2, MEMBER_CIN,   cin);
 
   // Page 2 — checkboxes
