@@ -12,9 +12,8 @@
 <div class="wrap">
 
 <!-- HEADER -->
-<div class="hdr">
-  <img src="https://ac4otvimls3ptbdw.public.blob.vercel-storage.com/white%20icon.png" alt="Premier Assist" class="hdr-logo">
-  <h1>Provider Attestation Form</h1>
+<div class="hdr-mark">
+  <img src="https://ac4otvimls3ptbdw.public.blob.vercel-storage.com/Icon%20Only.png" alt="Premier Assist">
 </div>
 
 <!-- PROGRESS -->
@@ -34,7 +33,7 @@
     <div class="f"><label for="mlast">Last name</label><input type="text" id="mlast" placeholder="Last name" autocomplete="family-name"></div>
   </div>
   <div class="row">
-    <div class="f"><label for="mdob">Date of birth</label><input type="date" id="mdob"></div>
+    <div class="f"><label for="mdob">Date of birth</label><input type="text" id="mdob" data-mask="date" inputmode="numeric" autocomplete="bday" placeholder="MM/DD/YYYY" maxlength="10"></div>
     <div class="f"><label for="mcin">CIN <span class="opt">optional</span></label><input type="text" id="mcin" placeholder="Client Identification Number"></div>
   </div>
   <div class="nav"><div></div><button class="btn btn-p" onclick="go(2)">Next: Eligibility criteria →</button></div>
@@ -149,7 +148,7 @@
   </div>
 
   <div class="row" style="margin-bottom:0">
-    <div class="f"><label for="sigdate">Date</label><input type="date" id="sigdate"></div>
+    <div class="f"><label for="sigdate">Date</label><input type="text" id="sigdate" data-mask="date" inputmode="numeric" placeholder="MM/DD/YYYY" maxlength="10"></div>
     <div></div>
   </div>
 

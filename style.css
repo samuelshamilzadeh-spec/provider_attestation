@@ -12,12 +12,9 @@
 body{font-family:var(--font);background:var(--bg);color:var(--tx);min-height:100vh;padding:2rem 1rem 5rem;-webkit-font-smoothing:antialiased}
 .wrap{max-width:660px;margin:0 auto}
 
-/* HEADER */
-.hdr{background:var(--navy);border-radius:var(--rl);padding:1.75rem 2rem;margin-bottom:1.25rem;color:#fff}
-.hdr-logo{display:block;height:34px;width:auto;margin-bottom:14px;opacity:.95}
-.hdr-eye{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:6px;font-weight:400}
-.hdr h1{font-size:19px;font-weight:500;margin-bottom:5px}
-.hdr p{font-size:13px;color:rgba(255,255,255,.5);line-height:1.5}
+/* HEADER MARK */
+.hdr-mark{display:flex;justify-content:center;align-items:center;margin:.5rem 0 1.25rem}
+.hdr-mark img{height:56px;width:auto;display:block}
 
 /* PROGRESS */
 .prog{display:flex;align-items:center;background:var(--wh);border:1px solid var(--bd);border-radius:var(--rl);padding:1rem 1.5rem;margin-bottom:1.25rem}
@@ -105,9 +102,8 @@ canvas{display:block;width:100%;height:180px;cursor:crosshair;touch-action:none;
 /* RESPONSIVE — TABLET */
 @media(max-width:640px){
   body{padding:1rem .75rem 4rem}
-  .hdr{padding:1.25rem 1.25rem}
-  .hdr-logo{height:28px;margin-bottom:10px}
-  .hdr h1{font-size:17px}
+  .hdr-mark{margin:.25rem 0 1rem}
+  .hdr-mark img{height:46px}
   .card{padding:1.25rem}
   .prog{padding:.85rem 1rem}
   .pgrid{grid-template-columns:repeat(2,1fr)}
@@ -133,8 +129,7 @@ canvas{display:block;width:100%;height:180px;cursor:crosshair;touch-action:none;
 }
 
 @media(max-width:380px){
-  .hdr{padding:1rem}
-  .hdr h1{font-size:16px}
+  .hdr-mark img{height:40px}
   .card{padding:1rem}
   canvas{height:150px}
 }

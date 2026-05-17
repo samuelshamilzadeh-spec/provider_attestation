@@ -7,7 +7,7 @@ function go(n) {
     const ln = document.getElementById('mlast').value.trim();
     const dob = document.getElementById('mdob').value;
     if (!fn || !ln) { mark('mfirst', !fn); mark('mlast', !ln); return; }
-    if (!dob) { mark('mdob', true); return; }
+    if (!isValidDate(dob)) { mark('mdob', true); return; }
   }
   document.getElementById('s'+cur).classList.remove('on');
   cur = n;
@@ -82,7 +82,49 @@ function clearSig(){
   document.getElementById('sighint').style.opacity='1';
 }
 
-document.getElementById('sigdate').valueAsDate = new Date();
+// ── DATE MASK (MM/DD/YYYY, auto-slash) ──────────────────────────
+function formatDateMask(digits) {
+  digits = digits.replace(/\D/g,'').slice(0,8);
+  let out = digits.slice(0,2);
+  if (digits.length >= 3) out += '/' + digits.slice(2,4);
+  if (digits.length >= 5) out += '/' + digits.slice(4,8);
+  return out;
+}
+function attachDateMask(el) {
+  el.addEventListener('input', e => {
+    const before = el.value;
+    const isDelete = e.inputType && e.inputType.startsWith('delete');
+    const formatted = formatDateMask(before);
+    el.value = formatted;
+    // place caret at end while typing forward
+    if (!isDelete) el.setSelectionRange(formatted.length, formatted.length);
+  });
+  el.addEventListener('paste', e => {
+    e.preventDefault();
+    const t = (e.clipboardData || window.clipboardData).getData('text');
+    el.value = formatDateMask(t);
+  });
+}
+document.querySelectorAll('input[data-mask="date"]').forEach(attachDateMask);
+
+function isValidDate(mmddyyyy) {
+  const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(mmddyyyy);
+  if (!m) return false;
+  const [_, mm, dd, yyyy] = m;
+  const d = new Date(+yyyy, +mm-1, +dd);
+  return d && d.getFullYear() === +yyyy && d.getMonth() === +mm-1 && d.getDate() === +dd;
+}
+function maskToIso(mmddyyyy) {
+  const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(mmddyyyy);
+  return m ? `${m[3]}-${m[1]}-${m[2]}` : '';
+}
+function todayMask() {
+  const d = new Date();
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  const dd = String(d.getDate()).padStart(2,'0');
+  return `${mm}/${dd}/${d.getFullYear()}`;
+}
+document.getElementById('sigdate').value = todayMask();
 
 // ── ERROR HANDLING ──────────────────────────────────────────────
 function showErr(msg){const e=document.getElementById('errmsg');e.textContent=msg;e.style.display='block';e.scrollIntoView({behavior:'smooth',block:'center'})}
@@ -97,9 +139,10 @@ async function doSubmit() {
   const firstName = document.getElementById('mfirst').value.trim();
   const lastName  = document.getElementById('mlast').value.trim();
   const memberName = (firstName+' '+lastName).trim();
-  const dob  = document.getElementById('mdob').value;
+  const dob  = maskToIso(document.getElementById('mdob').value);
   const cin  = document.getElementById('mcin').value;
-  const date = document.getElementById('sigdate').value;
+  const date = maskToIso(document.getElementById('sigdate').value) || maskToIso(todayMask());
+  if (!dob) return showErr('Please enter a valid date of birth (MM/DD/YYYY).');
   const checked = [...document.querySelectorAll('input[name=c]:checked')].map(el=>el.value);
   const signature = canvas.toDataURL('image/png');
 
@@ -131,11 +174,11 @@ async function doSubmit() {
 function reset() {
   document.getElementById('sok').classList.remove('on');
   document.querySelectorAll('input[type=text],input[type=date]').forEach(el=>el.value='');
+  document.getElementById('sigdate').value = todayMask();
   document.querySelectorAll('input[name=c]').forEach(el=>el.checked=false);
   document.querySelectorAll('.pc').forEach(c=>c.classList.remove('sel'));
   selProvider=''; hasSig=false;
   clearSig();
-  document.getElementById('sigdate').valueAsDate=new Date();
   const sub = document.getElementById('subbtn');
   sub.disabled = false;
   sub.textContent = 'Submit attestation';
