@@ -34,16 +34,24 @@ export default async function handler(req, res) {
   const dobParts  = splitDate(dob);
   const dateParts = splitDate(date);
 
+  const isWidgetSignature = (q) => {
+    if (q.type === 'control_signature') return true;
+    if (q.type !== 'control_widget') return false;
+    const cf = (q.cfname || q.widgetType || '').toLowerCase();
+    return cf.includes('signature') || cf.includes('smooth') || cf.includes('e-sign');
+  };
+
   const matchField = (q, key) => {
     const t  = (q.text || '').toLowerCase().trim();
     const nm = (q.name || '').toLowerCase();
+    const hasId = t.includes(' id') || t.endsWith(' id') || t === 'id' || nm.endsWith('id') || nm.includes('_id');
     switch (key) {
-      case 'name':      return t.includes('member name') || t === 'name' || t.includes('full name') || nm.includes('membername') || nm === 'name';
+      case 'name':      return (t.includes('member name') || t === 'name' || t.includes('full name') || nm.includes('membername') || nm === 'name') && !hasId;
       case 'dob':       return t.includes('dob') || t.includes('date of birth') || nm.includes('memberdob') || nm.includes('dob');
       case 'cin':       return t.includes('cin') || t.includes('client ident');
       case 'criteria':  return t.includes('check all') || t.includes('criteria') || t.includes('eligibility') || nm === 'scnprogram' || nm.includes('criteria');
-      case 'provider':  return nm === 'provider' || t === 'provider' || t.includes('provider name') || (t.includes('provider') && !t.includes('signature'));
-      case 'signature': return q.type === 'control_signature' || t.includes('signature') || nm.includes('signature');
+      case 'provider':  return !isWidgetSignature(q) && !hasId && (nm === 'provider' || t === 'provider' || t === 'provider name' || (t.includes('provider') && !t.includes('signature')));
+      case 'signature': return isWidgetSignature(q) || t.includes('signature') || nm.includes('signature');
       case 'date':      return (q.type === 'control_datetime' || t.includes('date')) && !t.includes('dob') && !t.includes('birth') && !t.includes('created') && !t.includes('scn');
     }
     return false;
@@ -66,8 +74,9 @@ export default async function handler(req, res) {
       return;
     }
     if (kind === 'signature') {
-      // Jotform signature field accepts a data URL
-      params.append(`submission[${id}]`, value || '');
+      // Strip data URL prefix — Jotform's signature widget stores raw base64
+      const b64 = String(value || '').replace(/^data:image\/\w+;base64,/, '');
+      params.append(`submission[${id}]`, b64);
       return;
     }
     if (kind === 'criteria' && Array.isArray(value)) {
@@ -100,6 +109,26 @@ export default async function handler(req, res) {
       if (matchField(q, 'provider'))  { appendField(params, q, id, provider, 'provider');     mapped[id] = 'provider'; return; }
       if (matchField(q, 'signature')) { appendField(params, q, id, signature, 'signature');   mapped[id] = 'signature'; return; }
       if (matchField(q, 'date'))      { appendField(params, q, id, date, 'date');             mapped[id] = 'date'; return; }
+
+      // Forward hidden/prefilled defaults — Jotform does not auto-apply them on API submit
+      const def = q.defaultValue ?? q.default ?? '';
+      if (def !== '' && def != null) {
+        const type = q.type || '';
+        if (type === 'control_datetime') {
+          const m = String(def).match(/(\d{4})-(\d{2})-(\d{2})/) || String(def).match(/(\d{2})\/(\d{2})\/(\d{4})/);
+          if (m) {
+            const [year, month, day] = m[0].includes('-') ? [m[1], m[2], m[3]] : [m[3], m[1], m[2]];
+            params.append(`submission[${id}][month]`, month);
+            params.append(`submission[${id}][day]`,   day);
+            params.append(`submission[${id}][year]`,  year);
+          } else {
+            params.append(`submission[${id}]`, String(def));
+          }
+        } else {
+          params.append(`submission[${id}]`, String(def));
+        }
+        mapped[id] = 'default';
+      }
     });
 
     const subRes = await fetch(`https://api.jotform.com/form/${encodeURIComponent(formId)}/submissions?apiKey=${encodeURIComponent(apiKey)}`, {
