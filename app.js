@@ -14,6 +14,10 @@ function go(n) {
   document.getElementById('s'+cur).classList.add('on');
   setProg(n);
   window.scrollTo({top:0,behavior:'smooth'});
+  // The canvas lives inside step 3 (display:none until shown). getBoundingClientRect
+  // returns 0×0 on a hidden element, so the initial resizeCanvas() at load left the
+  // canvas with width=0/height=0 on desktop — strokes had nowhere to render.
+  if (n === 3) requestAnimationFrame(resizeCanvas);
 }
 
 function mark(id, bad) {

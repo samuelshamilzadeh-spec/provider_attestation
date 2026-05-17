@@ -18,96 +18,103 @@ const PROVIDERS = {
 };
 
 // ── Coordinate map (US Letter 612x792, origin bottom-left) ───────────────────
+// Calibrated against the rendered template at 200 DPI on 2026-05-17.
+// Text positions use the BASELINE y (pdf-lib draws text from its baseline).
+// Checkbox positions are the BOTTOM-LEFT of a 7×7 filled square that sits inside
+// the template's hollow ~9pt box.
 
 // PAGE 0 (page 1 — instructions cover)
-// SCN Lead Entity Name header
-const SCN_NAME_P1 = { x: 200, y: 737 };
+// SCN Lead Entity Name header (underline at y≈745)
+const SCN_NAME_P1 = { x: 152, y: 747 };
 
 // PAGE 1 (page 2 — member info + checkboxes)
 // SCN Lead Entity Name header
-const SCN_NAME_P2  = { x: 200, y: 737 };
-// Member Name
-const MEMBER_NAME  = { x: 130, y: 693 };
-// Member DOB
-const MEMBER_DOB   = { x: 455, y: 693 };
-// Member CIN (Client Identification Number)
-const MEMBER_CIN   = { x: 175, y: 679 };
+const SCN_NAME_P2  = { x: 152, y: 747 };
+// Member Name (underline at y≈683)
+const MEMBER_NAME  = { x: 110, y: 685 };
+// Member DOB (same row as Member Name)
+const MEMBER_DOB   = { x: 485, y: 685 };
+// Member CIN — Client Identification Number (underline at y≈666)
+const MEMBER_CIN   = { x: 252, y: 668 };
 
-// LEFT COLUMN checkboxes (x: 57)
+// LEFT COLUMN checkboxes (template box left edge at x≈54)
 // Behavioral (SUD / SMI / I-DD) — grouped checkbox
-const CB_BEHAVIORAL      = { x: 57, y: 596 };
-// Pregnant / postpartum within 12 months
-const CB_PREG_12MO       = { x: 57, y: 551 };
-// Pregnant — refrigerated medication
-const CB_PREG_REFRIG     = { x: 57, y: 533 };
-// High-risk child
-const CB_HIGH_RISK_CHILD = { x: 57, y: 508 };
-// Child obesity
-const CB_CHILD_OBESE     = { x: 57, y: 476 };
-// Pre-procedure
-const CB_PRE_PROCEDURE   = { x: 57, y: 436 };
-// Post-hospitalization
-const CB_POST_HOSP       = { x: 57, y: 418 };
-// Enteral nutrition
-const CB_ENTERAL         = { x: 57, y: 376 };
-// Home modifications
-const CB_HOME_MODS       = { x: 57, y: 352 };
-// Home environmental
-const CB_HOME_ENV        = { x: 57, y: 326 };
-// Home remediation
-const CB_HOME_REMED      = { x: 57, y: 298 };
+const CB_BEHAVIORAL      = { x: 55, y: 558 };
+// Pregnant / up to 12 months postpartum
+const CB_PREG_12MO       = { x: 55, y: 506 };
+// Pregnant — requires refrigeration for breast milk
+const CB_PREG_REFRIG     = { x: 55, y: 488 };
+// High-risk child under 18
+const CB_HIGH_RISK_CHILD = { x: 55, y: 468 };
+// Children obese / underweight / malnutrition
+const CB_CHILD_OBESE     = { x: 55, y: 437 };
+// Requirement for pre-procedure
+const CB_PRE_PROCEDURE   = { x: 55, y: 389 };
+// Requirement for post-hospitalization care
+const CB_POST_HOSP       = { x: 55, y: 371 };
+// Receiving enteral / parenteral nutritional therapy
+const CB_ENTERAL         = { x: 55, y: 269 };
+// Need for medically necessary home modifications
+const CB_HOME_MODS       = { x: 55, y: 251 };
+// Health condition exacerbated by moisture / mold / pests
+const CB_HOME_ENV        = { x: 55, y: 212 };
+// Need for medical necessity of home remediation
+const CB_HOME_REMED      = { x: 55, y: 175 };
 
-// RIGHT COLUMN checkboxes (x: 318)
+// RIGHT COLUMN checkboxes (template box left edge at x≈318)
 // Thermoregulation
-const CB_THERMO          = { x: 318, y: 596 };
-// Heat-related ER visit
-const CB_HEAT_ER         = { x: 318, y: 548 };
-// Cold-related ER visit
-const CB_COLD_ER         = { x: 318, y: 530 };
+const CB_THERMO          = { x: 319, y: 557 };
+// Previous heat-related ER/urgent-care visit
+const CB_HEAT_ER         = { x: 319, y: 510 };
+// Previous cold-related ER/urgent-care visit
+const CB_COLD_ER         = { x: 319, y: 489 };
 // Chronic condition
-const CB_CHRONIC         = { x: 318, y: 492 };
-// Refrigerated medications
-const CB_REFRIG_MEDS     = { x: 318, y: 470 };
-// Asthma — inpatient
-const CB_ASTHMA_IP       = { x: 318, y: 440 };
-// Asthma — ED
-const CB_ASTHMA_ED       = { x: 318, y: 424 };
-// Asthma — urgent care
-const CB_ASTHMA_UC       = { x: 318, y: 408 };
-// Asthma — steroid use
-const CB_ASTHMA_STEROID  = { x: 318, y: 392 };
-// Asthma — inhaler use
-const CB_ASTHMA_INHALER  = { x: 318, y: 370 };
-// High utilizer
-const CB_HIGH_UTIL       = { x: 318, y: 342 };
-// Health Home enrollee
-const CB_HEALTH_HOME     = { x: 318, y: 326 };
+const CB_CHRONIC         = { x: 319, y: 450 };
+// Refrigerated medications for chronic condition
+const CB_REFRIG_MEDS     = { x: 319, y: 425 };
+// Asthma — 1+ hospital inpatient stay (last 12 mo)
+const CB_ASTHMA_IP       = { x: 319, y: 380 };
+// Asthma — 2+ ED visits
+const CB_ASTHMA_ED       = { x: 319, y: 357 };
+// Asthma — 2+ urgent care visits
+const CB_ASTHMA_UC       = { x: 319, y: 331 };
+// Asthma — 2+ oral steroid prescribing events
+const CB_ASTHMA_STEROID  = { x: 319, y: 305 };
+// Asthma — 3–11 rescue inhaler prescriptions
+const CB_ASTHMA_INHALER  = { x: 319, y: 279 };
+// Medicaid high utilizer
+const CB_HIGH_UTIL       = { x: 319, y: 239 };
+// Enrolled in NYS Health Home
+const CB_HEALTH_HOME     = { x: 319, y: 224 };
 // Homeless
-const CB_HOMELESS        = { x: 318, y: 312 };
-// Institutional setting
-const CB_INSTITUTIONAL   = { x: 318, y: 288 };
+const CB_HOMELESS        = { x: 319, y: 209 };
+// Transitioned out of institutional care
+const CB_INSTITUTIONAL   = { x: 319, y: 190 };
 
 // PAGE 2 (page 3 — provider info + signature)
-// SCN Lead Entity Name header
-const SCN_NAME_P3    = { x: 200, y: 737 };
-// Provider name line ("I, ___")
-const PROV_NAME_LINE = { x: 108, y: 678 };
-// Provider NPI
-const PROV_NPI       = { x: 175, y: 641 };
-// Provider Medicaid ID
-const PROV_MEDICAID  = { x: 430, y: 641 };
-// Facility
-const FACILITY       = { x: 115, y: 624 };
-// Telephone
-const TELEPHONE_POS  = { x: 300, y: 624 };
-// Fax
-const FAX_POS        = { x: 452, y: 624 };
-// HIPAA email (leave blank)
-const HIPAA_EMAIL    = { x: 218, y: 608 };
-// Signature image
-const SIGNATURE_IMG  = { x: 108, y: 530, width: 180, height: 50 };
-// Date
-const DATE_POS       = { x: 430, y: 542 };
+// SCN Lead Entity Name header (sits lower on this page; underline at y≈718)
+const SCN_NAME_P3    = { x: 152, y: 720 };
+// "I, ___ [print full name]" — provider name blank (underline at y≈640)
+const PROV_NAME_LINE = { x: 110, y: 642 };
+// Provider Individual NPI (underline at y≈595)
+const PROV_NPI       = { x: 152, y: 597 };
+// Medicaid Provider ID (MMIS Number) — same row as NPI
+const PROV_MEDICAID  = { x: 480, y: 597 };
+// Facility Name (underline at y≈578)
+const FACILITY       = { x: 113, y: 580 };
+// Telephone (same row as Facility)
+const TELEPHONE_POS  = { x: 305, y: 580 };
+// Fax (same row as Facility)
+const FAX_POS        = { x: 445, y: 580 };
+// HIPAA email — left blank by design
+const HIPAA_EMAIL    = { x: 220, y: 562 };
+// Provider Signature image (underline at y≈478)
+// Box height kept modest so the canvas's empty whitespace doesn't overlap the
+// italic paragraph above (which ends at ~y=510). The signature PNG is transparent
+// so only the strokes show.
+const SIGNATURE_IMG  = { x: 135, y: 480, width: 180, height: 28 };
+// Date (same row as signature; underline at y≈478)
+const DATE_POS       = { x: 460, y: 480 };
 
 // ── Criteria → checkbox map ──────────────────────────────────────────────────
 const BEHAVIORAL_TRIGGERS = [
@@ -163,6 +170,16 @@ async function main() {
   const payload = JSON.parse(Buffer.from(arg, 'base64').toString('utf8'));
   const { memberName, dob, cin, criteria = [], provider, date, signatureDataUrl } = payload;
 
+  // The DOB field on page 2 and the date row on page 3 read more naturally as
+  // MM/DD/YYYY than the ISO strings the frontend sends; the DOB template also
+  // has pre-drawn "/__/__/" separators that line up with US-format dates.
+  const isoToUS = (iso) => {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso || ''));
+    return m ? `${m[2]}/${m[3]}/${m[1]}` : (iso || '');
+  };
+  const dobStr  = isoToUS(dob);
+  const dateStr = isoToUS(date);
+
   const provInfo = PROVIDERS[provider] || { display: provider, npi: '', medicaidId: '' };
 
   const tplBytes = fs.readFileSync(TEMPLATE_PATH);
@@ -182,7 +199,7 @@ async function main() {
   // Page 2 — header + member info
   draw(page2, SCN_NAME_P2,  SCN_LEAD_ENTITY);
   draw(page2, MEMBER_NAME,  memberName);
-  draw(page2, MEMBER_DOB,   dob);
+  draw(page2, MEMBER_DOB,   dobStr);
   draw(page2, MEMBER_CIN,   cin);
 
   // Page 2 — checkboxes
@@ -205,7 +222,7 @@ async function main() {
   draw(page3, TELEPHONE_POS,  TELEPHONE);
   draw(page3, FAX_POS,        FAX);
   // HIPAA_EMAIL left blank
-  draw(page3, DATE_POS,       date);
+  draw(page3, DATE_POS,       dateStr);
 
   // Signature image
   if (signatureDataUrl && signatureDataUrl.startsWith('data:image/')) {
