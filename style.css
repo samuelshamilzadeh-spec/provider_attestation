@@ -41,6 +41,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--tx);min-height:100
 .f{display:flex;flex-direction:column;gap:5px}
 .f label{font-size:13px;font-weight:500;color:#334155}
 .opt{font-size:11px;font-weight:400;color:var(--lt);margin-left:4px}
+.req{color:var(--pink);font-weight:500;margin-left:2px}
 input[type=text],input[type=date],input[type=tel],input[type=email]{height:42px;padding:0 12px;border:1px solid var(--bd);border-radius:var(--r);font-family:var(--font);font-size:16px;color:var(--tx);background:#fff;outline:none;transition:border-color .15s,box-shadow .15s;width:100%}
 input:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(24,56,102,.07)}
 input::placeholder{color:#CBD5E1}
