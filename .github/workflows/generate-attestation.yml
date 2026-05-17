@@ -1,0 +1,76 @@
+name: Generate Attestation PDF
+
+on:
+  workflow_dispatch:
+    inputs:
+      payload:
+        description: 'Base64-encoded JSON payload'
+        required: true
+        type: string
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install pdf-lib nodemailer node-fetch
+
+      - name: Generate PDF
+        id: gen
+        run: |
+          OUTPUT=$(node scripts/populate_pdf.js "${{ inputs.payload }}" | tail -n 1)
+          echo "Generated: $OUTPUT"
+          echo "output_path=$OUTPUT" >> "$GITHUB_OUTPUT"
+
+      - name: Send email
+        env:
+          SMTP_HOST: smtp.gmail.com
+          SMTP_PORT: '587'
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          RECIPIENT_EMAIL: ${{ secrets.RECIPIENT_EMAIL }}
+          PAYLOAD_B64: ${{ inputs.payload }}
+          OUTPUT_PATH: ${{ steps.gen.outputs.output_path }}
+        run: |
+          node -e "
+          import('nodemailer').then(async ({default: nodemailer}) => {
+            const fs = await import('fs');
+            const path = await import('path');
+            const payload = JSON.parse(Buffer.from(process.env.PAYLOAD_B64, 'base64').toString('utf8'));
+            const { memberName, dob, cin, criteria = [], provider, date } = payload;
+            const outputPath = process.env.OUTPUT_PATH;
+            const subject = \`SCN Attestation — \${memberName} — \${date}\`;
+            const body = [
+              \`Provider: \${provider}\`,
+              \`Member Name: \${memberName}\`,
+              \`DOB: \${dob}\`,
+              \`CIN: \${cin || ''}\`,
+              '',
+              'Criteria checked:',
+              ...criteria.map(c => \`  • \${c}\`)
+            ].join('\n');
+            const transporter = nodemailer.createTransport({
+              host: process.env.SMTP_HOST,
+              port: parseInt(process.env.SMTP_PORT, 10),
+              secure: false,
+              requireTLS: true,
+              auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
+            });
+            await transporter.sendMail({
+              from: process.env.SMTP_USER,
+              to: process.env.RECIPIENT_EMAIL,
+              subject,
+              text: body,
+              attachments: [{ filename: path.basename(outputPath), path: outputPath }]
+            });
+            console.log('Email sent');
+          }).catch(err => { console.error(err); process.exit(1); });
+          "
