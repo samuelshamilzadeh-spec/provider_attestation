@@ -68,7 +68,7 @@ const CB_ASTHMA_UC       = { x: 281, y: 342 };
 const CB_ASTHMA_STEROID  = { x: 281, y: 329 };
 const CB_ASTHMA_INHALER  = { x: 281, y: 307 };
 const CB_HIGH_UTIL       = { x: 280, y: 277 };
-const CB_HEALTH_HOME     = { x: 281, y: 263 };
+const CB_HEALTH_HOME     = { x: 281, y: 260 };
 const CB_HOMELESS        = { x: 281, y: 254 };
 const CB_INSTITUTIONAL   = { x: 282, y: 235 };
 
