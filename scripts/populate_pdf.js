@@ -43,35 +43,35 @@ const MEMBER_DOB_YYYY = { x: 522, y: 685 };
 // Member CIN — Client Identification Number (underline at y≈666)
 const MEMBER_CIN   = { x: 252, y: 668 };
 
-// LEFT COLUMN checkboxes — y values are the BOTTOM of each template box, detected
-// by scanning the rendered template at 200 DPI for the small hollow squares.
-const CB_BEHAVIORAL      = { x: 55, y: 562 };
-const CB_PREG_12MO       = { x: 55, y: 505 };
-const CB_PREG_REFRIG     = { x: 55, y: 482 };
-const CB_HIGH_RISK_CHILD = { x: 55, y: 459 };
-const CB_CHILD_OBESE     = { x: 55, y: 436 };
-const CB_PRE_PROCEDURE   = { x: 55, y: 380 };
-const CB_POST_HOSP       = { x: 55, y: 367 };
-const CB_ENTERAL         = { x: 55, y: 266 };
-const CB_HOME_MODS       = { x: 55, y: 254 };
-const CB_HOME_ENV        = { x: 55, y: 219 };
-const CB_HOME_REMED      = { x: 55, y: 174 };
+// LEFT COLUMN checkboxes — x matches the template box's left edge (x≈51).
+const CB_BEHAVIORAL      = { x: 51, y: 562 };
+const CB_PREG_12MO       = { x: 51, y: 505 };
+const CB_PREG_REFRIG     = { x: 51, y: 482 };
+const CB_HIGH_RISK_CHILD = { x: 51, y: 459 };
+const CB_CHILD_OBESE     = { x: 51, y: 436 };
+const CB_PRE_PROCEDURE   = { x: 51, y: 380 };
+const CB_POST_HOSP       = { x: 51, y: 367 };
+const CB_ENTERAL         = { x: 51, y: 266 };
+const CB_HOME_MODS       = { x: 51, y: 254 };
+const CB_HOME_ENV        = { x: 51, y: 219 };
+const CB_HOME_REMED      = { x: 51, y: 174 };
 
-// RIGHT COLUMN checkboxes
-const CB_THERMO          = { x: 319, y: 562 };
-const CB_HEAT_ER         = { x: 319, y: 505 };
-const CB_COLD_ER         = { x: 319, y: 482 };
-const CB_CHRONIC         = { x: 319, y: 448 };
-const CB_REFRIG_MEDS     = { x: 319, y: 425 };
-const CB_ASTHMA_IP       = { x: 319, y: 380 };
-const CB_ASTHMA_ED       = { x: 319, y: 357 };
-const CB_ASTHMA_UC       = { x: 319, y: 331 };
-const CB_ASTHMA_STEROID  = { x: 319, y: 308 };
-const CB_ASTHMA_INHALER  = { x: 319, y: 274 };
-const CB_HIGH_UTIL       = { x: 319, y: 250 };
-const CB_HEALTH_HOME     = { x: 319, y: 237 };
-const CB_HOMELESS        = { x: 319, y: 225 };
-const CB_INSTITUTIONAL   = { x: 319, y: 192 };
+// RIGHT COLUMN checkboxes — x matches the template box's left edge (x≈314).
+// Asthma + Other recalibrated against text-line detection on 2026-05-17 (round 2).
+const CB_THERMO          = { x: 314, y: 562 };
+const CB_HEAT_ER         = { x: 314, y: 505 };
+const CB_COLD_ER         = { x: 314, y: 482 };
+const CB_CHRONIC         = { x: 314, y: 448 };
+const CB_REFRIG_MEDS     = { x: 314, y: 425 };
+const CB_ASTHMA_IP       = { x: 314, y: 394 };
+const CB_ASTHMA_ED       = { x: 314, y: 371 };
+const CB_ASTHMA_UC       = { x: 314, y: 348 };
+const CB_ASTHMA_STEROID  = { x: 314, y: 335 };
+const CB_ASTHMA_INHALER  = { x: 314, y: 313 };
+const CB_HIGH_UTIL       = { x: 314, y: 270 };
+const CB_HEALTH_HOME     = { x: 314, y: 255 };
+const CB_HOMELESS        = { x: 314, y: 243 };
+const CB_INSTITUTIONAL   = { x: 314, y: 225 };
 
 // PAGE 2 (page 3 — provider info + signature)
 // SCN Lead Entity Name header (sits lower on this page; underline at y≈718)
