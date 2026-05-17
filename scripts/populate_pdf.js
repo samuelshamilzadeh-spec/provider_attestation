@@ -43,35 +43,34 @@ const MEMBER_DOB_YYYY = { x: 522, y: 685 };
 // Member CIN — Client Identification Number (underline at y≈666)
 const MEMBER_CIN   = { x: 252, y: 668 };
 
-// LEFT COLUMN checkboxes — x matches the template box's left edge (x≈51).
-const CB_BEHAVIORAL      = { x: 51, y: 562 };
-const CB_PREG_12MO       = { x: 51, y: 505 };
-const CB_PREG_REFRIG     = { x: 51, y: 482 };
-const CB_HIGH_RISK_CHILD = { x: 51, y: 459 };
-const CB_CHILD_OBESE     = { x: 51, y: 436 };
-const CB_PRE_PROCEDURE   = { x: 51, y: 380 };
-const CB_POST_HOSP       = { x: 51, y: 367 };
-const CB_ENTERAL         = { x: 51, y: 266 };
-const CB_HOME_MODS       = { x: 51, y: 254 };
-const CB_HOME_ENV        = { x: 51, y: 219 };
-const CB_HOME_REMED      = { x: 51, y: 174 };
+// LEFT COLUMN checkboxes — x matches the template box's left edge.
+const CB_BEHAVIORAL      = { x: 45, y: 562 };
+const CB_PREG_12MO       = { x: 45, y: 505 };
+const CB_PREG_REFRIG     = { x: 45, y: 482 };
+const CB_HIGH_RISK_CHILD = { x: 45, y: 459 };
+const CB_CHILD_OBESE     = { x: 45, y: 436 };
+const CB_PRE_PROCEDURE   = { x: 45, y: 380 };
+const CB_POST_HOSP       = { x: 45, y: 367 };
+const CB_ENTERAL         = { x: 45, y: 266 };
+const CB_HOME_MODS       = { x: 45, y: 254 };
+const CB_HOME_ENV        = { x: 45, y: 219 };
+const CB_HOME_REMED      = { x: 45, y: 174 };
 
-// RIGHT COLUMN checkboxes — x matches the template box's left edge (x≈314).
-// Asthma + Other recalibrated against text-line detection on 2026-05-17 (round 2).
-const CB_THERMO          = { x: 314, y: 562 };
-const CB_HEAT_ER         = { x: 314, y: 505 };
-const CB_COLD_ER         = { x: 314, y: 482 };
-const CB_CHRONIC         = { x: 314, y: 448 };
-const CB_REFRIG_MEDS     = { x: 314, y: 425 };
-const CB_ASTHMA_IP       = { x: 314, y: 394 };
-const CB_ASTHMA_ED       = { x: 314, y: 371 };
-const CB_ASTHMA_UC       = { x: 314, y: 348 };
-const CB_ASTHMA_STEROID  = { x: 314, y: 335 };
-const CB_ASTHMA_INHALER  = { x: 314, y: 313 };
-const CB_HIGH_UTIL       = { x: 314, y: 270 };
-const CB_HEALTH_HOME     = { x: 314, y: 255 };
-const CB_HOMELESS        = { x: 314, y: 243 };
-const CB_INSTITUTIONAL   = { x: 314, y: 225 };
+// RIGHT COLUMN checkboxes
+const CB_THERMO          = { x: 294, y: 562 };
+const CB_HEAT_ER         = { x: 294, y: 505 };
+const CB_COLD_ER         = { x: 294, y: 482 };
+const CB_CHRONIC         = { x: 294, y: 448 };
+const CB_REFRIG_MEDS     = { x: 294, y: 425 };
+const CB_ASTHMA_IP       = { x: 294, y: 394 };
+const CB_ASTHMA_ED       = { x: 294, y: 371 };
+const CB_ASTHMA_UC       = { x: 294, y: 348 };
+const CB_ASTHMA_STEROID  = { x: 294, y: 335 };
+const CB_ASTHMA_INHALER  = { x: 294, y: 313 };
+const CB_HIGH_UTIL       = { x: 294, y: 270 };
+const CB_HEALTH_HOME     = { x: 294, y: 255 };
+const CB_HOMELESS        = { x: 294, y: 243 };
+const CB_INSTITUTIONAL   = { x: 294, y: 225 };
 
 // PAGE 2 (page 3 — provider info + signature)
 // SCN Lead Entity Name header (sits lower on this page; underline at y≈718)
@@ -82,9 +81,9 @@ const SCN_NAME_P3    = { x: 152, y: 720 };
 // not the underline, to keep the provider name in the same row as the "I,".
 const PROV_NAME_LINE = { x: 110, y: 648 };
 // Provider Individual NPI (underline at y≈595)
-const PROV_NPI       = { x: 152, y: 597 };
+const PROV_NPI       = { x: 152, y: 599 };
 // Medicaid Provider ID (MMIS Number) — same row as NPI
-const PROV_MEDICAID  = { x: 480, y: 597 };
+const PROV_MEDICAID  = { x: 480, y: 599 };
 // Facility Name (underline at y≈578)
 const FACILITY       = { x: 113, y: 580 };
 // Telephone (same row as Facility)
@@ -102,6 +101,8 @@ const SIGNATURE_IMG  = { x: 135, y: 480, width: 180, height: 28 };
 const DATE_POS       = { x: 460, y: 480 };
 
 // ── Criteria → checkbox map ──────────────────────────────────────────────────
+// Keys here MUST match the exact `value` strings on the checkboxes in index.html —
+// the frontend passes those strings unchanged.
 const BEHAVIORAL_TRIGGERS = [
   'Substance Use Disorder (SUD)',
   'Severe Mental Illness (SMI)',
@@ -109,30 +110,30 @@ const BEHAVIORAL_TRIGGERS = [
 ];
 
 const CRITERIA_MAP = {
-  'Pregnant or postpartum within 12 months': CB_PREG_12MO,
-  'Pregnant — refrigerated medication': CB_PREG_REFRIG,
-  'High-risk child': CB_HIGH_RISK_CHILD,
-  'Child obesity': CB_CHILD_OBESE,
-  'Pre-procedure': CB_PRE_PROCEDURE,
-  'Post-hospitalization': CB_POST_HOSP,
-  'Enteral nutrition': CB_ENTERAL,
-  'Home modifications': CB_HOME_MODS,
-  'Home environmental': CB_HOME_ENV,
-  'Home remediation': CB_HOME_REMED,
-  'Thermoregulation': CB_THERMO,
-  'Heat-related ER visit': CB_HEAT_ER,
-  'Cold-related ER visit': CB_COLD_ER,
+  'Pregnant or up to 12 months postpartum': CB_PREG_12MO,
+  'Pregnant / postpartum requiring refrigerated breast milk': CB_PREG_REFRIG,
+  'High-risk child under 18': CB_HIGH_RISK_CHILD,
+  'Child under 18 — obese, underweight, or malnourished': CB_CHILD_OBESE,
+  'Pre-procedure requirement': CB_PRE_PROCEDURE,
+  'Post-hospitalization care': CB_POST_HOSP,
+  'Enteral or parenteral nutritional therapy': CB_ENTERAL,
+  'Need for medically necessary home modifications': CB_HOME_MODS,
+  'Health condition exacerbated by home environment': CB_HOME_ENV,
+  'Medical necessity for home remediation': CB_HOME_REMED,
+  'Condition affecting thermoregulation': CB_THERMO,
+  'Previous heat-related illness (ER/urgent care in last 12 months)': CB_HEAT_ER,
+  'Previous cold-related illness (ER/urgent care in last 12 months)': CB_COLD_ER,
   'Chronic condition': CB_CHRONIC,
-  'Refrigerated medications': CB_REFRIG_MEDS,
-  'Asthma — inpatient': CB_ASTHMA_IP,
-  'Asthma — ED': CB_ASTHMA_ED,
-  'Asthma — urgent care': CB_ASTHMA_UC,
-  'Asthma — steroid use': CB_ASTHMA_STEROID,
-  'Asthma — inhaler use': CB_ASTHMA_INHALER,
-  'High utilizer': CB_HIGH_UTIL,
-  'Health Home enrollee': CB_HEALTH_HOME,
+  'Requires refrigerated medications for a chronic condition': CB_REFRIG_MEDS,
+  '1+ inpatient hospital stay for asthma (last 12 months)': CB_ASTHMA_IP,
+  '2+ ED visits for asthma (last 12 months)': CB_ASTHMA_ED,
+  '2+ urgent care visits for asthma (last 12 months)': CB_ASTHMA_UC,
+  '2+ oral steroid prescribing events for asthma (last 12 months)': CB_ASTHMA_STEROID,
+  '3–11 rescue inhaler prescriptions (last 12 months)': CB_ASTHMA_INHALER,
+  'Medicaid high utilizer': CB_HIGH_UTIL,
+  'Enrolled in NYS Health Home': CB_HEALTH_HOME,
   'Homeless': CB_HOMELESS,
-  'Institutional setting': CB_INSTITUTIONAL
+  'Transitioning out of institutional / congregate care (last 90 days)': CB_INSTITUTIONAL
 };
 
 function drawCheckbox(page, pos) {
