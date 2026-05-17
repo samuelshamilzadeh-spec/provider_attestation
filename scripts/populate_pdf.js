@@ -62,14 +62,14 @@ const CB_HEAT_ER         = { x: 282, y: 505 };
 const CB_COLD_ER         = { x: 282, y: 482 };
 const CB_CHRONIC         = { x: 282, y: 448 };
 const CB_REFRIG_MEDS     = { x: 282, y: 425 };
-const CB_ASTHMA_IP       = { x: 282, y: 387 };
-const CB_ASTHMA_ED       = { x: 282, y: 364 };
-const CB_ASTHMA_UC       = { x: 282, y: 341 };
-const CB_ASTHMA_STEROID  = { x: 282, y: 328 };
-const CB_ASTHMA_INHALER  = { x: 282, y: 306 };
-const CB_HIGH_UTIL       = { x: 282, y: 280 };
-const CB_HEALTH_HOME     = { x: 282, y: 265 };
-const CB_HOMELESS        = { x: 282, y: 253 };
+const CB_ASTHMA_IP       = { x: 281, y: 388 };
+const CB_ASTHMA_ED       = { x: 281, y: 365 };
+const CB_ASTHMA_UC       = { x: 281, y: 342 };
+const CB_ASTHMA_STEROID  = { x: 281, y: 329 };
+const CB_ASTHMA_INHALER  = { x: 281, y: 307 };
+const CB_HIGH_UTIL       = { x: 280, y: 277 };
+const CB_HEALTH_HOME     = { x: 281, y: 263 };
+const CB_HOMELESS        = { x: 281, y: 254 };
 const CB_INSTITUTIONAL   = { x: 282, y: 235 };
 
 // PAGE 2 (page 3 — provider info + signature)

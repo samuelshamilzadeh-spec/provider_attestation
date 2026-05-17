@@ -42,21 +42,10 @@ jobs:
         run: |
           node -e "
           import('nodemailer').then(async ({default: nodemailer}) => {
-            const fs = await import('fs');
-            const path = await import('path');
             const payload = JSON.parse(Buffer.from(process.env.PAYLOAD_B64, 'base64').toString('utf8'));
-            const { memberName, dob, cin, criteria = [], provider, date } = payload;
-            const outputPath = process.env.OUTPUT_PATH;
-            const subject = \`SCN Attestation — \${memberName} — \${date}\`;
-            const body = [
-              \`Provider: \${provider}\`,
-              \`Member Name: \${memberName}\`,
-              \`DOB: \${dob}\`,
-              \`CIN: \${cin || ''}\`,
-              '',
-              'Criteria checked:',
-              ...criteria.map(c => \`  • \${c}\`)
-            ].join('\n');
+            const { memberName = '', dob = '' } = payload;
+            const safe = s => String(s).trim().replace(/[^A-Za-z0-9\-]+/g, '_').replace(/^_+|_+$/g, '') || 'attestation';
+            const attachmentName = \`\${safe(memberName)}_\${safe(dob)}.pdf\`;
             const transporter = nodemailer.createTransport({
               host: process.env.SMTP_HOST,
               port: parseInt(process.env.SMTP_PORT, 10),
@@ -67,10 +56,10 @@ jobs:
             await transporter.sendMail({
               from: process.env.SMTP_USER,
               to: process.env.RECIPIENT_EMAIL,
-              subject,
-              text: body,
-              attachments: [{ filename: path.basename(outputPath), path: outputPath }]
+              subject: 'New Signed Provider Attestation',
+              text: '',
+              attachments: [{ filename: attachmentName, path: process.env.OUTPUT_PATH }]
             });
-            console.log('Email sent');
+            console.log('Email sent:', attachmentName);
           }).catch(err => { console.error(err); process.exit(1); });
           "
