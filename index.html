@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Provider Attestation — NYS SCN</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div class="wrap">
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-eye">NYS Social Care Network · Premier Assist</div>
+  <h1>Provider Attestation Form</h1>
+  <p>Document medical eligibility for health-related social need services funded by New York State Medicaid.</p>
+</div>
+
+<!-- PROGRESS -->
+<div class="prog" id="prog">
+  <div class="ps"><div class="pdot on" id="d1">1</div><span class="plbl on" id="l1">Member info</span></div>
+  <div class="pline"></div>
+  <div class="ps"><div class="pdot" id="d2">2</div><span class="plbl" id="l2">Eligibility criteria</span></div>
+  <div class="pline"></div>
+  <div class="ps" style="flex:0 0 auto"><div class="pdot" id="d3">3</div><span class="plbl" id="l3">Provider &amp; sign</span></div>
+</div>
+
+<!-- ── STEP 1: MEMBER ── -->
+<div class="step on card" id="s1">
+  <div class="slbl">Member information</div>
+  <div class="row">
+    <div class="f"><label for="mfirst">First name</label><input type="text" id="mfirst" placeholder="First name" autocomplete="given-name"></div>
+    <div class="f"><label for="mlast">Last name</label><input type="text" id="mlast" placeholder="Last name" autocomplete="family-name"></div>
+  </div>
+  <div class="row">
+    <div class="f"><label for="mdob">Date of birth</label><input type="date" id="mdob"></div>
+    <div class="f"><label for="mcin">CIN <span class="opt">optional</span></label><input type="text" id="mcin" placeholder="Client Identification Number"></div>
+  </div>
+  <div class="nav"><div></div><button class="btn btn-p" onclick="go(2)">Next: Eligibility criteria →</button></div>
+</div>
+
+<!-- ── STEP 2: CRITERIA ── -->
+<div class="step card" id="s2">
+  <div class="slbl">Check all criteria that apply to this member</div>
+
+  <div class="cgrp">
+    <div class="chd">Behavioral &amp; Developmental Health Needs</div>
+    <label class="ci"><input type="checkbox" name="c" value="Substance Use Disorder (SUD)"><div><div class="cin">Substance Use Disorder (SUD)</div><div class="cid">Diagnosed with SUD (alcohol, opioids, marijuana, heroin, etc.) interfering with daily life, physical health, or involving illegal substance use.</div></div></label>
+    <label class="ci"><input type="checkbox" name="c" value="Severe Mental Illness (SMI)"><div><div class="cin">Severe Mental Illness (SMI)</div><div class="cid">Persistent or life-threatening mental health condition requiring stabilization — e.g., schizophrenia, bipolar disorder, or at risk of suicide.</div></div></label>
+    <label class="ci"><input type="checkbox" name="c" value="Intellectual or Developmental Disability (I/DD)"><div><div class="cin">Intellectual or Developmental Disability (I/DD)</div><div class="cid">Requires services/supports to achieve care goals — e.g., Autism, Cerebral Palsy, Epilepsy, Prader-Willi syndrome, Fetal Alcohol Syndrome.</div></div></label>
+  </div>
+
+  <div class="cgrp">
+    <div class="chd">Maternal &amp; Child Health</div>
+    <label class="ci"><input type="checkbox" name="c" value="Pregnant or up to 12 months postpartum"><div><div class="cin">Pregnant or up to 12 months postpartum</div><div class="cid">Currently pregnant or within 12 months of delivery, miscarriage, or termination.</div></div></label>
+    <label class="ci"><input type="checkbox" name="c" value="Pregnant / postpartum — requires refrigerated breast milk"><div><div class="cin">Pregnant / postpartum — requires refrigerated breast milk</div><div class="cid">Same postpartum window as above with documented need for breast milk refrigeration.</div></div></label>
+    <label class="ci"><input type="checkbox" name="c" value="High-risk child under 18"><div><div class="cin">High-risk child under 18</div><div class="cid">Chronic condition, maltreatment history, CYSHCN status, low birth weight (&lt;2500g), or condition from trauma/neglect — e.g., asthma, sickle cell, autism, anxiety.</div></div></label>
+    <label class="ci"><input type="checkbox" name="c" value="Child under 18 — obese, underweight, or malnourished"><div><div class="cin">Child under 18 — obese, underweight, or malnourished</div><div class="cid">Child at risk of developmental/growth delay due to malnutrition, overweight, underweight, or obesity.</div></div></label>
+  </div>
+
+  <div class="cgrp">
+    <div class="chd">Special Medical Care — Adults (Medical Respite)</div>
+    <label class="ci"><input type="checkbox" name="c" value="Pre-procedure requirement"><div><div class="cin">Pre-procedure requirement</div><div class="cid">Member requires care or support in preparation for a scheduled procedure.</div></div></label>
+    <label class="ci"><input type="checkbox" name="c" value="Post-hospitalization care"><div><div class="cin">Post-hospitalization care</div><div class="cid">At risk for inpatient/ED hospitalization AND needs recuperation; OR transitioning from institution or acute care related to a health condition.</div></div></label>
+  </div>
+
+  <div class="cgrp">
+    <div class="chd">Nutritional &amp; Home Modification Needs</div>
+    <label class="ci"><input type="checkbox" name="c" value="Enteral or parenteral nutritional therapy"><div><div class="cin">Enteral or parenteral nutritional therapy</div><div class="cid">Member is receiving tube feeding or IV nutrition.</div></div></label>
+    <label class="ci"><input type="checkbox" name="c" value="Medically necessary home modifications"><div><div class="cin">Medically necessary home modifications</div><div class="cid">Physical disability requiring modifications for safety/access — e.g., ramps, handrails, grab bars.</div></div></label>
+    <label class="ci"><input type="checkbox" name="c" value="Condition exacerbated by home environment (mold, moisture, pests, air quality)"><div><div class="cin">Condition exacerbated by home environment</div><div class="cid">Condition worsened by moisture, mold, pests, or indoor air quality — e.g., asthma, COPD, environmental allergies, atopic dermatitis.</div></div></label>
+    <label class="ci"><input type="checkbox" name="c" value="Medical necessity for home remediation"><div><div class="cin">Medical necessity for home remediation</div><div class="cid">Documented need for mold or pest remediation in the home.</div></div></label>
+  </div>
+
+  <div class="cgrp">
+    <div class="chd">Environmental &amp; Temperature-Related</div>
+    <label class="ci"><input type="checkbox" name="c" value="Condition affecting thermoregulation"><div><div class="cin">Condition affecting thermoregulation</div><div class="cid">Medical condition or medications that significantly impair temperature regulation, including dependence on others for environmental control.</div></div></label>
+    <label class="ci"><input type="checkbox" name="c" value="Heat-related illness — ER or urgent care visit in last 12 months"><div><div class="cin">Heat-related illness — ER or urgent care (last 12 months)</div><div class="cid">Visited ER or urgent care for a heat-related illness within the past year.</div></div></label>
+    <label class="ci"><input type="checkbox" name="c" value="Cold-related illness — ER or urgent care visit in last 12 months"><div><div class="cin">Cold-related illness — ER or urgent care (last 12 months)</div><div class="cid">Visited ER or urgent care for a cold-related illness within the past year.</div></div></label>
+  </div>
+
+  <div class="cgrp">
+    <div class="chd">Chronic Health Conditions</div>
+    <label class="ci"><input type="checkbox" name="c" value="Chronic condition (DOH-listed)"><div><div class="cin">Chronic condition (DOH-listed)</div><div class="cid">Pre-diabetes, diabetes, chronic Hepatitis-C, CHF, chronic kidney disease, COPD, obesity, hypertension, malignancies, asthma, sickle cell, HIV/AIDS, and others on the DOH list.</div></div></label>
+    <label class="ci"><input type="checkbox" name="c" value="Requires refrigerated medications for chronic condition management"><div><div class="cin">Requires refrigerated medications for chronic condition</div><div class="cid">Chronic condition management depends on refrigerated medications — e.g., certain insulins, biologics.</div></div></label>
+  </div>
+
+  <div class="cgrp">
+    <div class="chd">Asthma</div>
+    <label class="ci"><input type="checkbox" name="c" value="1+ inpatient hospital stay for asthma (last 12 months)"><div><div class="cin">1+ inpatient hospital stay for asthma (last 12 months)</div><div class="cid">At least one asthma-related hospital admission in the past year.</div></div></label>
+    <label class="ci"><input type="checkbox" name="c" value="2+ ED visits for asthma (last 12 months)"><div><div class="cin">2+ ED visits for asthma (last 12 months)</div><div class="cid">Two or more emergency department visits related to asthma in the past year.</div></div></label>
+    <label class="ci"><input type="checkbox" name="c" value="2+ urgent care visits for asthma (last 12 months)"><div><div class="cin">2+ urgent care visits for asthma (last 12 months)</div><div class="cid">Two or more urgent care visits related to asthma in the past year.</div></div></label>
+    <label class="ci"><input type="checkbox" name="c" value="2+ oral steroid prescriptions for asthma (last 12 months)"><div><div class="cin">2+ oral steroid prescriptions for asthma (last 12 months)</div><div class="cid">Two or more prescribing events for oral steroids related to asthma diagnosis in the past year.</div></div></label>
+    <label class="ci"><input type="checkbox" name="c" value="3–11 rescue inhaler prescriptions (last 12 months)"><div><div class="cin">3–11 rescue inhaler prescriptions (last 12 months)</div><div class="cid">Between 3 and 11 prescribing events for a rescue inhaler including albuterol — indicating frequent acute need.</div></div></label>
+  </div>
+
+  <div class="cgrp">
+    <div class="chd">Other</div>
+    <label class="ci"><input type="checkbox" name="c" value="Medicaid high utilizer"><div><div class="cin">Medicaid high utilizer</div><div class="cid">5+ ED visits in last 12 months; OR 4+ ED visits AND 1+ inpatient stays; OR 2+ inpatient stays in last 12 months.</div></div></label>
+    <label class="ci"><input type="checkbox" name="c" value="Enrolled in NYS Health Home"><div><div class="cin">Enrolled in NYS Health Home</div><div class="cid">Currently enrolled in a New York State Health Home care management program.</div></div></label>
+    <label class="ci"><input type="checkbox" name="c" value="Homeless"><div><div class="cin">Homeless</div><div class="cid">Literally homeless, facing imminent homelessness, homeless under federal regulations, or fleeing domestic violence. Per HUD definition (24 CFR 91.5).</div></div></label>
+    <label class="ci"><input type="checkbox" name="c" value="Transitioning out of institutional or congregate care (last 90 days)"><div><div class="cin">Transitioning out of institutional / congregate care (last 90 days)</div><div class="cid">Discharged within 90 days from a nursing facility, group home, correctional facility, State Psychiatric, SRO, or acute care hospital.</div></div></label>
+  </div>
+
+  <div class="nav">
+    <button class="btn" onclick="go(1)">← Back</button>
+    <button class="btn btn-p" onclick="go(3)">Next: Provider &amp; sign →</button>
+  </div>
+</div>
+
+<!-- ── STEP 3: PROVIDER + SIGN ── -->
+<div class="step card" id="s3">
+
+  <div style="margin-bottom:1.75rem">
+    <div class="slbl">Select provider</div>
+    <div class="pgrid">
+      <div class="pc" onclick="selProv(this,'Esther Sobel')">
+        <div class="pav av-a">ES</div>
+        <div class="pnm">Esther Sobel</div>
+        <div class="pchk">✓</div>
+      </div>
+      <div class="pc" onclick="selProv(this,'Osnat Cohen')">
+        <div class="pav av-b">OC</div>
+        <div class="pnm">Osnat Cohen</div>
+        <div class="pchk">✓</div>
+      </div>
+      <div class="pc" onclick="selProv(this,'Jennifer Kahan')">
+        <div class="pav av-c">JK</div>
+        <div class="pnm">Jennifer Kahan</div>
+        <div class="pchk">✓</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slbl">Attestation</div>
+  <div class="attest">"I hereby attest that the information contained herein is current, complete, and accurate to the best of my knowledge and belief. I understand that my attestation may result in the provision of services which are paid for by state and federal funds and I also understand that whoever knowingly and willfully makes or causes to be made a false statement, or representation may be prosecuted under the applicable federal and state laws."</div>
+
+  <div style="margin-bottom:1rem">
+    <span class="siglbl">Provider signature</span>
+    <div class="sigwrap">
+      <div class="sighint" id="sighint">Draw signature here</div>
+      <canvas id="sigpad" width="600" height="180"></canvas>
+    </div>
+    <div class="sigfoot">
+      <button class="bclr" onclick="clearSig()">↺ Clear</button>
+      <span class="signote">Sign with mouse or finger</span>
+    </div>
+  </div>
+
+  <div class="row" style="margin-bottom:0">
+    <div class="f"><label for="sigdate">Date</label><input type="date" id="sigdate"></div>
+    <div></div>
+  </div>
+
+  <div class="errmsg" id="errmsg"></div>
+
+  <div class="nav">
+    <button class="btn" onclick="go(2)">← Back</button>
+    <button class="btn btn-p" id="subbtn" onclick="doSubmit()">Submit attestation</button>
+  </div>
+</div>
+
+<!-- ── SUCCESS ── -->
+<div class="step card" id="sok">
+  <div class="okwrap">
+    <div class="okicon">✓</div>
+    <h2>Attestation submitted</h2>
+    <p>The provider attestation has been recorded in Jotform successfully.</p>
+    <button class="btn" onclick="reset()">Submit another attestation</button>
+  </div>
+</div>
+
+</div><!-- /wrap -->
+
+<script src="/app.js"></script>
+</body>
+</html>
