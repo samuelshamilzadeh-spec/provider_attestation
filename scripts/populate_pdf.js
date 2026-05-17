@@ -57,20 +57,20 @@ const CB_HOME_ENV        = { x: 45, y: 219 };
 const CB_HOME_REMED      = { x: 45, y: 174 };
 
 // RIGHT COLUMN checkboxes
-const CB_THERMO          = { x: 294, y: 562 };
-const CB_HEAT_ER         = { x: 294, y: 505 };
-const CB_COLD_ER         = { x: 294, y: 482 };
-const CB_CHRONIC         = { x: 294, y: 448 };
-const CB_REFRIG_MEDS     = { x: 294, y: 425 };
-const CB_ASTHMA_IP       = { x: 294, y: 394 };
-const CB_ASTHMA_ED       = { x: 294, y: 371 };
-const CB_ASTHMA_UC       = { x: 294, y: 348 };
-const CB_ASTHMA_STEROID  = { x: 294, y: 335 };
-const CB_ASTHMA_INHALER  = { x: 294, y: 313 };
-const CB_HIGH_UTIL       = { x: 294, y: 270 };
-const CB_HEALTH_HOME     = { x: 294, y: 255 };
-const CB_HOMELESS        = { x: 294, y: 243 };
-const CB_INSTITUTIONAL   = { x: 294, y: 225 };
+const CB_THERMO          = { x: 282, y: 562 };
+const CB_HEAT_ER         = { x: 282, y: 505 };
+const CB_COLD_ER         = { x: 282, y: 482 };
+const CB_CHRONIC         = { x: 282, y: 448 };
+const CB_REFRIG_MEDS     = { x: 282, y: 425 };
+const CB_ASTHMA_IP       = { x: 282, y: 387 };
+const CB_ASTHMA_ED       = { x: 282, y: 364 };
+const CB_ASTHMA_UC       = { x: 282, y: 341 };
+const CB_ASTHMA_STEROID  = { x: 282, y: 328 };
+const CB_ASTHMA_INHALER  = { x: 282, y: 306 };
+const CB_HIGH_UTIL       = { x: 282, y: 280 };
+const CB_HEALTH_HOME     = { x: 282, y: 265 };
+const CB_HOMELESS        = { x: 282, y: 253 };
+const CB_INSTITUTIONAL   = { x: 282, y: 235 };
 
 // PAGE 2 (page 3 — provider info + signature)
 // SCN Lead Entity Name header (sits lower on this page; underline at y≈718)
