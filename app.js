@@ -131,9 +131,8 @@ function todayMask() {
 document.getElementById('sigdate').value = todayMask();
 
 // ── URL PARAM PREFILL ───────────────────────────────────────────
-// Accepts: ?name=John+Smith&dob=01/15/1980&cin=ABC123
-//   Also:  ?fn=John&ln=Smith (explicit first/last)
-// DOB tolerates MM/DD/YYYY, MM-DD-YYYY, YYYY-MM-DD, M/D/YYYY
+// Accepts: ?patientFull=John+Smith&patientDate=01/15/1980&medicaidId=ABC123
+// patientDate tolerates MM/DD/YYYY, MM-DD-YYYY, YYYY-MM-DD, M/D/YYYY
 function normalizeDob(raw) {
   const s = String(raw).trim();
   let m;
@@ -149,21 +148,15 @@ function normalizeDob(raw) {
   const p = new URLSearchParams(window.location.search);
   if (![...p.keys()].length) return;
 
-  const name = (p.get('name') || '').trim();
-  const fn   = (p.get('fn')   || '').trim();
-  const ln   = (p.get('ln')   || '').trim();
-  const dob  = (p.get('dob')  || '').trim();
-  const cin  = (p.get('cin')  || '').trim();
+  const full = (p.get('patientFull') || '').trim();
+  const dob  = (p.get('patientDate') || '').trim();
+  const cin  = (p.get('medicaidId')  || '').trim();
 
-  if (fn || ln) {
-    if (fn) document.getElementById('mfirst').value = fn;
-    if (ln) document.getElementById('mlast').value  = ln;
-  } else if (name) {
-    const parts = name.split(/\s+/);
+  if (full) {
+    const parts = full.split(/\s+/);
     document.getElementById('mfirst').value = parts[0] || '';
     document.getElementById('mlast').value  = parts.slice(1).join(' ') || '';
   }
-
   if (dob) {
     const norm = normalizeDob(dob);
     if (norm) document.getElementById('mdob').value = norm;
