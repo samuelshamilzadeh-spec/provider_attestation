@@ -37,65 +37,44 @@ const MEMBER_DOB   = { x: 485, y: 685 };
 // Member CIN — Client Identification Number (underline at y≈666)
 const MEMBER_CIN   = { x: 252, y: 668 };
 
-// LEFT COLUMN checkboxes (template box left edge at x≈54)
-// Behavioral (SUD / SMI / I-DD) — grouped checkbox
-const CB_BEHAVIORAL      = { x: 55, y: 558 };
-// Pregnant / up to 12 months postpartum
-const CB_PREG_12MO       = { x: 55, y: 506 };
-// Pregnant — requires refrigeration for breast milk
-const CB_PREG_REFRIG     = { x: 55, y: 488 };
-// High-risk child under 18
-const CB_HIGH_RISK_CHILD = { x: 55, y: 468 };
-// Children obese / underweight / malnutrition
-const CB_CHILD_OBESE     = { x: 55, y: 437 };
-// Requirement for pre-procedure
-const CB_PRE_PROCEDURE   = { x: 55, y: 389 };
-// Requirement for post-hospitalization care
-const CB_POST_HOSP       = { x: 55, y: 371 };
-// Receiving enteral / parenteral nutritional therapy
-const CB_ENTERAL         = { x: 55, y: 269 };
-// Need for medically necessary home modifications
-const CB_HOME_MODS       = { x: 55, y: 251 };
-// Health condition exacerbated by moisture / mold / pests
-const CB_HOME_ENV        = { x: 55, y: 212 };
-// Need for medical necessity of home remediation
-const CB_HOME_REMED      = { x: 55, y: 175 };
+// LEFT COLUMN checkboxes — y values are the BOTTOM of each template box, detected
+// by scanning the rendered template at 200 DPI for the small hollow squares.
+const CB_BEHAVIORAL      = { x: 55, y: 562 };
+const CB_PREG_12MO       = { x: 55, y: 505 };
+const CB_PREG_REFRIG     = { x: 55, y: 482 };
+const CB_HIGH_RISK_CHILD = { x: 55, y: 459 };
+const CB_CHILD_OBESE     = { x: 55, y: 436 };
+const CB_PRE_PROCEDURE   = { x: 55, y: 380 };
+const CB_POST_HOSP       = { x: 55, y: 367 };
+const CB_ENTERAL         = { x: 55, y: 266 };
+const CB_HOME_MODS       = { x: 55, y: 254 };
+const CB_HOME_ENV        = { x: 55, y: 219 };
+const CB_HOME_REMED      = { x: 55, y: 174 };
 
-// RIGHT COLUMN checkboxes (template box left edge at x≈318)
-// Thermoregulation
-const CB_THERMO          = { x: 319, y: 557 };
-// Previous heat-related ER/urgent-care visit
-const CB_HEAT_ER         = { x: 319, y: 510 };
-// Previous cold-related ER/urgent-care visit
-const CB_COLD_ER         = { x: 319, y: 489 };
-// Chronic condition
-const CB_CHRONIC         = { x: 319, y: 450 };
-// Refrigerated medications for chronic condition
+// RIGHT COLUMN checkboxes
+const CB_THERMO          = { x: 319, y: 562 };
+const CB_HEAT_ER         = { x: 319, y: 505 };
+const CB_COLD_ER         = { x: 319, y: 482 };
+const CB_CHRONIC         = { x: 319, y: 448 };
 const CB_REFRIG_MEDS     = { x: 319, y: 425 };
-// Asthma — 1+ hospital inpatient stay (last 12 mo)
 const CB_ASTHMA_IP       = { x: 319, y: 380 };
-// Asthma — 2+ ED visits
 const CB_ASTHMA_ED       = { x: 319, y: 357 };
-// Asthma — 2+ urgent care visits
 const CB_ASTHMA_UC       = { x: 319, y: 331 };
-// Asthma — 2+ oral steroid prescribing events
-const CB_ASTHMA_STEROID  = { x: 319, y: 305 };
-// Asthma — 3–11 rescue inhaler prescriptions
-const CB_ASTHMA_INHALER  = { x: 319, y: 279 };
-// Medicaid high utilizer
-const CB_HIGH_UTIL       = { x: 319, y: 239 };
-// Enrolled in NYS Health Home
-const CB_HEALTH_HOME     = { x: 319, y: 224 };
-// Homeless
-const CB_HOMELESS        = { x: 319, y: 209 };
-// Transitioned out of institutional care
-const CB_INSTITUTIONAL   = { x: 319, y: 190 };
+const CB_ASTHMA_STEROID  = { x: 319, y: 308 };
+const CB_ASTHMA_INHALER  = { x: 319, y: 274 };
+const CB_HIGH_UTIL       = { x: 319, y: 250 };
+const CB_HEALTH_HOME     = { x: 319, y: 237 };
+const CB_HOMELESS        = { x: 319, y: 225 };
+const CB_INSTITUTIONAL   = { x: 319, y: 192 };
 
 // PAGE 2 (page 3 — provider info + signature)
 // SCN Lead Entity Name header (sits lower on this page; underline at y≈718)
 const SCN_NAME_P3    = { x: 152, y: 720 };
-// "I, ___ [print full name]" — provider name blank (underline at y≈640)
-const PROV_NAME_LINE = { x: 110, y: 642 };
+// "I, ___ [print full name]" — provider name blank.
+// The "I," letter baseline sits at y≈648; the underline (rendered as `___`
+// characters) descends below the baseline, so we anchor to the LABEL baseline,
+// not the underline, to keep the provider name in the same row as the "I,".
+const PROV_NAME_LINE = { x: 110, y: 648 };
 // Provider Individual NPI (underline at y≈595)
 const PROV_NPI       = { x: 152, y: 597 };
 // Medicaid Provider ID (MMIS Number) — same row as NPI
