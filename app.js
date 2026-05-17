@@ -48,7 +48,7 @@ function resizeCanvas() {
   canvas.width = Math.round(r.width * dpr);
   canvas.height = Math.round(r.height * dpr);
   ctx.setTransform(dpr,0,0,dpr,0,0);
-  ctx.strokeStyle = '#0F1923';
+  ctx.strokeStyle = '#183866';
   ctx.lineWidth = 1.8;
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
