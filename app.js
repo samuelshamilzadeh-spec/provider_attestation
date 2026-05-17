@@ -94,11 +94,14 @@ async function doSubmit() {
   if (!selProvider) return showErr('Please select a provider before submitting.');
   if (!hasSig) return showErr('Provider signature is required.');
 
-  const memberName = (document.getElementById('mfirst').value+' '+document.getElementById('mlast').value).trim();
+  const firstName = document.getElementById('mfirst').value.trim();
+  const lastName  = document.getElementById('mlast').value.trim();
+  const memberName = (firstName+' '+lastName).trim();
   const dob  = document.getElementById('mdob').value;
   const cin  = document.getElementById('mcin').value;
   const date = document.getElementById('sigdate').value;
   const checked = [...document.querySelectorAll('input[name=c]:checked')].map(el=>el.value);
+  const signature = canvas.toDataURL('image/png');
 
   const btn = document.getElementById('subbtn');
   btn.disabled = true;
@@ -108,7 +111,7 @@ async function doSubmit() {
     const res = await fetch('/api/submit', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({memberName, dob, cin, criteria: checked, provider: selProvider, date})
+      body: JSON.stringify({memberName, firstName, lastName, dob, cin, criteria: checked, provider: selProvider, date, signature})
     });
     const data = await res.json().catch(()=>({error:'Invalid server response'}));
     if (!res.ok || data.error) throw new Error(data.error || 'Submission failed');
