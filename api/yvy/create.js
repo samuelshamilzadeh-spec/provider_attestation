@@ -116,24 +116,24 @@ export default async function handler(req, res) {
       // "telehealth visit" to the Yeled V'Yalda food benefit on their own).
       const copy = language === 'es'
         ? {
-            subject: "Yeled V'Yalda: un paso para comenzar sus beneficios de alimentos",
+            subject: 'Un paso para comenzar sus beneficios de alimentos',
             heading: 'Un paso para comenzar sus beneficios',
             intro: [
-              "Usted se inscribió recientemente con Yeled V'Yalda para recibir beneficios de alimentos y otros apoyos. Antes de que puedan comenzar, un proveedor de salud debe completar una breve certificación con usted durante una llamada telefónica corta. Es gratis y solo toma unos minutos.",
+              'Usted se inscribió recientemente para recibir beneficios de alimentos y otros apoyos. Antes de que puedan comenzar, un proveedor de salud debe completar una breve certificación con usted durante una llamada telefónica corta. Es gratis y solo toma unos minutos.',
               'Toque el botón de abajo para ingresar algunos datos y elegir el horario que mejor le convenga. Por favor tenga a la mano su tarjeta de seguro, ya que agregará una foto de ella en el formulario.'
             ],
             button: 'Programar mi visita',
-            footer: "Un proveedor le llamará por teléfono a la hora que elija. Si tiene preguntas, comuníquese con Yeled V'Yalda."
+            footer: 'Un proveedor le llamará por teléfono a la hora que elija.'
           }
         : {
-            subject: "Yeled V'Yalda: one step to start your food benefits",
+            subject: 'One step to start your food benefits',
             heading: 'One step to start your benefits',
             intro: [
-              "You recently signed up with Yeled V'Yalda to receive food and other support benefits. Before they can begin, a healthcare provider needs to complete a short attestation with you during a brief phone visit. It's free and takes just a few minutes.",
+              "You recently signed up to receive food and other support benefits. Before they can begin, a healthcare provider needs to complete a short attestation with you during a brief phone visit. It's free and takes just a few minutes.",
               "Tap the button below to enter a few details and choose a time that works for you. Please have your insurance card nearby, since you'll add a photo of it in the form."
             ],
             button: 'Schedule my visit',
-            footer: "A provider will call you by phone at the time you choose. If you have any questions, please contact Yeled V'Yalda."
+            footer: 'A provider will call you by phone at the time you choose.'
           };
       try {
         await sendMail({
