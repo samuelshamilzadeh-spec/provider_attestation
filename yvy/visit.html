@@ -185,6 +185,9 @@ function go(id){show(id);window.scrollTo({top:0,behavior:'smooth'});if(id==='sC'
 function isoToMask(iso){const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(iso||'');return m?`${m[2]}/${m[3]}/${m[1]}`:iso||''}
 function fmtTime(hhmm){if(!hhmm)return'';const[h,m]=hhmm.split(':').map(Number);return`${((h+11)%12)+1}:${String(m).padStart(2,'0')} ${h>=12?'PM':'AM'}`}
 function esc(s){const d=document.createElement('div');d.textContent=s==null?'':String(s);return d.innerHTML}
+// Card photos + PDF are fetched through the app, gated by this visit token —
+// never by a public blob URL.
+const fileUrl = which => `/api/yvy/file?role=visit&which=${which}&t=${encodeURIComponent(token)}`;
 
 // ── INIT ────────────────────────────────────────────────────────
 (async function init(){
@@ -208,19 +211,20 @@ function esc(s){const d=document.createElement('div');d.textContent=s==null?'':S
   ];
   $('summary').innerHTML = rows.map(([k,v])=>`<div class="irow"><span class="ik">${esc(k)}</span><span class="iv">${esc(v)}</span></div>`).join('');
 
-  if(s.cardFrontUrl){
+  if(s.cardFront){
+    const f=fileUrl('cardFront'), b=fileUrl('cardBack');
     $('cardimgs').innerHTML =
-      `<a href="${esc(s.cardFrontUrl)}" target="_blank" rel="noopener"><img src="${esc(s.cardFrontUrl)}" alt="Card front"><div class="clbl">Front — tap to enlarge</div></a>`+
-      `<a href="${esc(s.cardBackUrl)}" target="_blank" rel="noopener"><img src="${esc(s.cardBackUrl)}" alt="Card back"><div class="clbl">Back — tap to enlarge</div></a>`;
+      `<a href="${f}" target="_blank" rel="noopener"><img src="${f}" alt="Card front"><div class="clbl">Front — tap to enlarge</div></a>`+
+      `<a href="${b}" target="_blank" rel="noopener"><img src="${b}" alt="Card back"><div class="clbl">Back — tap to enlarge</div></a>`;
   } else {
-    $('cardimgs').innerHTML='<div class="note" style="grid-column:1/-1;margin:0">No card photos uploaded yet.</div>';
+    $('cardimgs').innerHTML='<div class="note" style="grid-column:1/-1;margin:0">No card photos on file'+(s.source==='staff'?' (scheduled by YVY staff).':' yet.')+'</div>';
   }
 
   if(record.status==='sent'){
     $('warnbox').innerHTML='<div class="warn">The patient has not submitted their information yet.</div>';
   } else if(record.status==='completed'){
-    const link=record.completion&&record.completion.pdfUrl;
-    $('warnbox').innerHTML='<div class="warn">This attestation was already completed'+(link?` — <a href="${esc(link)}" target="_blank" rel="noopener">view the signed PDF</a>. `:'. ')+'Submitting again will replace it.</div>';
+    const link=record.completion&&record.completion.pdf ? fileUrl('pdf') : null;
+    $('warnbox').innerHTML='<div class="warn">This attestation was already completed'+(link?` — <a href="${link}" target="_blank" rel="noopener">view the signed PDF</a>. `:'. ')+'Submitting again will replace it.</div>';
   }
 
   show('sA');
@@ -286,7 +290,7 @@ async function doSubmit(){
     const data=await res.json().catch(()=>({error:'Invalid server response'}));
     if(!res.ok||data.error)throw new Error(data.error||'Submission failed');
 
-    $('pdflink').href=data.pdfUrl;
+    $('pdflink').href=fileUrl('pdf');
     show('sok');
     window.scrollTo({top:0,behavior:'smooth'});
   }catch(err){

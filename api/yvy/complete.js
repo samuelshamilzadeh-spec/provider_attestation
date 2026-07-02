@@ -72,7 +72,7 @@ export default async function handler(req, res) {
 Lead Entity: ${record.leadEntity}
 Provider:    ${provider}
 
-View the completed documents here:
+View the completed documents (including the signed PDF) here:
 ${docsLink}`,
         html: renderEmail({
           heading: 'Attestation completed',
@@ -90,7 +90,7 @@ ${docsLink}`,
       }).catch(err => console.error('YVY email failed:', err.message));
     }
 
-    return res.status(200).json({ success: true, pdfUrl, docsLink });
+    return res.status(200).json({ success: true, docsLink });
   } catch (err) {
     return res.status(500).json({ error: err.message || 'Internal error' });
   }

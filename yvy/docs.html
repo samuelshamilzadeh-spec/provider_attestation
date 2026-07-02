@@ -73,12 +73,17 @@ function esc(s){const d=document.createElement('div');d.textContent=s==null?'':S
   ];
   $('summary').innerHTML = rows.map(([k,v])=>`<div class="irow"><span class="ik">${esc(k)}</span><span class="iv">${esc(v)}</span></div>`).join('');
 
-  if(c.pdfUrl){ $('pdflink').href=c.pdfUrl } else { $('pdflink').style.display='none' }
+  // Files are fetched through the app, gated by this docs token — never by a
+  // public blob URL.
+  const fileUrl = which => `/api/yvy/file?role=docs&which=${which}&t=${encodeURIComponent(token)}`;
 
-  if(s.cardFrontUrl){
+  if(c.pdf){ $('pdflink').href=fileUrl('pdf') } else { $('pdflink').style.display='none' }
+
+  if(s.cardFront){
+    const f=fileUrl('cardFront'), b=fileUrl('cardBack');
     $('cardimgs').innerHTML =
-      `<a href="${esc(s.cardFrontUrl)}" target="_blank" rel="noopener"><img src="${esc(s.cardFrontUrl)}" alt="Card front"><div class="clbl">Front</div></a>`+
-      `<a href="${esc(s.cardBackUrl)}" target="_blank" rel="noopener"><img src="${esc(s.cardBackUrl)}" alt="Card back"><div class="clbl">Back</div></a>`;
+      `<a href="${f}" target="_blank" rel="noopener"><img src="${f}" alt="Card front"><div class="clbl">Front</div></a>`+
+      `<a href="${b}" target="_blank" rel="noopener"><img src="${b}" alt="Card back"><div class="clbl">Back</div></a>`;
   } else {
     $('cardimgs').innerHTML='<div class="note" style="grid-column:1/-1;margin:0">No card photos on file.</div>';
   }
