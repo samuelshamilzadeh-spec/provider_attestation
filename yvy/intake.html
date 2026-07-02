@@ -119,6 +119,7 @@
 </div>
 
 <script src="/yvy/config.js"></script>
+<script src="/yvy/calendar.js"></script>
 <script>
 const $ = id => document.getElementById(id);
 let lang = 'en', mode = 'send';
@@ -187,6 +188,14 @@ function formatDateMask(d){d=d.replace(/\D/g,'').slice(0,8);let o=d.slice(0,2);i
 document.querySelectorAll('input[data-mask="date"]').forEach(el=>{
   el.addEventListener('input',e=>{const del=e.inputType&&e.inputType.startsWith('delete');const f=formatDateMask(el.value);el.value=f;if(!del)el.setSelectionRange(f.length,f.length)});
 });
+
+// Calendar pickers — DOB allows past dates (no weekend rule); visit date is
+// future weekdays only, matching the scheduling rules.
+(function(){
+  const today=new Date();today.setHours(0,0,0,0);
+  attachCalendar($('dob'), { locale:'en', max:today, minYear:1900, maxYear:today.getFullYear() });
+  attachCalendar($('vdate'), { locale:'en', min:today, disableWeekends:true, maxYear:today.getFullYear()+1 });
+})();
 function isValidDate(s){const m=/^(\d{2})\/(\d{2})\/(\d{4})$/.exec(s);if(!m)return false;const d=new Date(+m[3],+m[1]-1,+m[2]);return d.getFullYear()===+m[3]&&d.getMonth()===+m[1]-1&&d.getDate()===+m[2]}
 function maskToIso(s){const m=/^(\d{2})\/(\d{2})\/(\d{4})$/.exec(s);return m?`${m[3]}-${m[1]}-${m[2]}`:''}
 function isWeekend(iso){const [y,mo,d]=iso.split('-').map(Number);const dow=new Date(y,mo-1,d).getDay();return dow===0||dow===6}

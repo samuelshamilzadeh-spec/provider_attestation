@@ -98,6 +98,7 @@
 </div>
 
 <script src="/yvy/config.js"></script>
+<script src="/yvy/calendar.js"></script>
 <script>
 const $ = id => document.getElementById(id);
 const params = new URLSearchParams(location.search);
@@ -223,8 +224,11 @@ function maskToIso(s){const m=/^(\d{2})\/(\d{2})\/(\d{4})$/.exec(s);return m?`${
   t('rels').forEach((label,i)=>{const o=document.createElement('option');o.value=T.en.rels[i];o.textContent=label;rel.appendChild(o)});
   rel.addEventListener('change',()=>{ $('fillerwrap').style.display = (rel.value && rel.value!=='Self') ? 'block':'none' });
 
-  // Date mask for visit date
+  // Date mask + calendar picker for visit date (future weekdays only, in the
+  // patient's language).
   $('vdate').addEventListener('input',e=>{const el=e.target;const del=e.inputType&&e.inputType.startsWith('delete');const f=formatDateMask(el.value);el.value=f;if(!del)el.setSelectionRange(f.length,f.length)});
+  const _today=new Date();_today.setHours(0,0,0,0);
+  attachCalendar($('vdate'), { locale:lang, min:_today, disableWeekends:true });
 
   // Schedule window + time slots (gated by language)
   const w = window.YVY_SCHEDULE[lang] || window.YVY_SCHEDULE.en;

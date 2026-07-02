@@ -81,6 +81,28 @@
 /* Static label above a non-input control (language segmented control). */
 .flbl{font-size:12.5px;font-weight:500;color:var(--navy);margin-bottom:8px;display:block}
 
+/* ── Date picker (shadcn/Radix-style, vanilla) ─────────────────────────────── */
+.ff.has-cal input{padding-right:42px}
+.calbtn{position:absolute;top:27px;transform:translateY(-50%);right:9px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border:none;background:transparent;color:var(--navy);cursor:pointer;border-radius:7px;padding:0;-webkit-tap-highlight-color:transparent}
+.calbtn:hover{background:#F0F4F8}
+.calpop{position:absolute;top:58px;left:0;z-index:60;width:290px;background:#fff;border:1px solid var(--bd);border-radius:var(--rl);box-shadow:0 14px 40px rgba(15,23,35,.16);padding:14px}
+.calhdr{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:10px}
+.calnav{width:32px;height:32px;flex:0 0 auto;border:1px solid var(--bd);background:#fff;border-radius:8px;cursor:pointer;font-size:17px;line-height:1;color:var(--tx);display:flex;align-items:center;justify-content:center;padding:0;transition:background .12s}
+.calnav:hover{background:#F1F5F9}
+.calsel{display:flex;gap:6px;flex:1;justify-content:center}
+.calmonth,.calyear{appearance:none;-webkit-appearance:none;-moz-appearance:none;border:1px solid var(--bd);border-radius:8px;background:#fff;font-family:var(--font);font-size:13.5px;font-weight:500;color:var(--tx);padding:6px 10px;cursor:pointer;outline:none}
+.calmonth:focus,.calyear:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(24,56,102,.15)}
+.caldow{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px}
+.caldow span{text-align:center;font-size:11px;font-weight:500;color:var(--lt);padding:4px 0}
+.calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cald{height:34px;border:none;background:transparent;border-radius:8px;font-family:var(--font);font-size:13.5px;color:var(--tx);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;transition:background .1s}
+.cald.empty{visibility:hidden;cursor:default}
+.cald:not(.dis):not(.sel):hover{background:#F0F4F8}
+.cald.today{color:var(--navy);font-weight:600;box-shadow:inset 0 0 0 1.5px var(--bd)}
+.cald.sel{background:var(--navy);color:#fff;font-weight:500;box-shadow:none}
+.cald.dis{color:#CBD5E1;cursor:default}
+@media(max-width:520px){.calpop{width:min(92vw,300px)}}
+
 /* Language segmented control */
 .seg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .seg .sopt{border:1.5px solid var(--bd);border-radius:var(--r);padding:15px 8px;text-align:center;font-size:15px;font-weight:500;cursor:pointer;background:#fff;user-select:none;transition:all .15s;-webkit-tap-highlight-color:transparent}
