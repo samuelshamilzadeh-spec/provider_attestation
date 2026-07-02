@@ -24,7 +24,7 @@
   <div id="warnbox"></div>
   <div class="info" id="summary"></div>
 
-  <div class="f" style="margin-bottom:12px">
+  <div class="f" style="margin-bottom:12px" id="cardsection">
     <label class="flbl">Insurance card</label>
     <div class="cardimgs" id="cardimgs"></div>
   </div>
@@ -199,15 +199,12 @@ const fileUrl = which => `/api/yvy/file?role=visit&which=${which}&t=${encodeURIC
   }catch{ return show('sbad') }
 
   const s=record.submission||{};
+  // Keep this compact — just the info the clinician needs to begin, mirroring
+  // the Stand Out flow (name / DOB / insurance pre-filled).
   const rows=[
     ['Patient', record.firstName+' '+record.lastName],
     ['DOB', isoToMask(record.dob)],
-    ['Language', record.language==='es'?'Spanish':'English'],
-    ['Lead Entity', record.leadEntity],
-    ['Visit', s.visitDate?isoToMask(s.visitDate)+' at '+fmtTime(s.visitTime):'Not provided'],
-    ['Address', s.address?`${s.address}, ${s.city}, ${s.state} ${s.zip}`:'Not provided'],
-    ['Insurance', s.insuranceCarrier?`${s.insuranceCarrier}, ${s.insuranceMemberId}`:'Not provided'],
-    ['Filled out by', s.relationship?(s.relationship+(s.fillerName?` (${s.fillerName})`:'')):(s.source==='staff'?'Yeled V\'Yalda staff':'Not provided')]
+    ['Insurance', s.insuranceCarrier?`${s.insuranceCarrier}, ${s.insuranceMemberId}`:'Not provided']
   ];
   $('summary').innerHTML = rows.map(([k,v])=>`<div class="irow"><span class="ik">${esc(k)}</span><span class="iv">${esc(v)}</span></div>`).join('');
 
@@ -217,7 +214,8 @@ const fileUrl = which => `/api/yvy/file?role=visit&which=${which}&t=${encodeURIC
       `<a href="${f}" target="_blank" rel="noopener"><img src="${f}" alt="Card front"><div class="clbl">Front (tap to enlarge)</div></a>`+
       `<a href="${b}" target="_blank" rel="noopener"><img src="${b}" alt="Card back"><div class="clbl">Back (tap to enlarge)</div></a>`;
   } else {
-    $('cardimgs').innerHTML='<div class="note" style="grid-column:1/-1;margin:0">No card photos on file'+(s.source==='staff'?' (scheduled by YVY staff).':' yet.')+'</div>';
+    // No photos: hide the whole card section rather than showing an empty note.
+    $('cardsection').style.display='none';
   }
 
   if(record.status==='sent'){
