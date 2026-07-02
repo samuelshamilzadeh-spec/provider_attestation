@@ -1,0 +1,59 @@
+/* Additions used by the Yeled V'Yalda pages (loaded after /style.css) */
+
+select{height:42px;padding:0 12px;border:1px solid var(--bd);border-radius:var(--r);font-family:var(--font);font-size:16px;color:var(--tx);background:#fff;outline:none;transition:border-color .15s,box-shadow .15s;width:100%;appearance:auto}
+select:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(24,56,102,.07)}
+select.err{border-color:var(--er)}
+select:disabled{background:#F1F5F9;color:var(--lt)}
+
+input[readonly]{background:#F8FAFC;color:var(--mu)}
+
+/* Language segmented control */
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.seg .sopt{border:1.5px solid var(--bd);border-radius:var(--r);padding:11px 8px;text-align:center;font-size:14px;font-weight:500;cursor:pointer;background:#fff;user-select:none;transition:all .15s;-webkit-tap-highlight-color:transparent}
+.seg .sopt:hover{background:#F8FAFC}
+.seg .sopt.sel{border-color:var(--navy);background:#F0F4F8;box-shadow:0 0 0 3px rgba(24,56,102,.07)}
+
+/* Photo upload tiles */
+.upgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.uptile{border:1.5px dashed var(--bd);border-radius:var(--rl);background:#F8FAFC;padding:1rem;text-align:center;cursor:pointer;transition:all .15s;position:relative;min-height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;-webkit-tap-highlight-color:transparent}
+.uptile:hover{border-color:#94A3B8}
+.uptile.err{border-color:var(--er)}
+.uptile.has{border-style:solid;border-color:var(--ok);background:var(--ok-bg);padding:.5rem}
+.uptile input{display:none}
+.upicon{font-size:22px}
+.uplbl{font-size:12.5px;font-weight:500;color:#334155}
+.upnote{font-size:11px;color:var(--lt)}
+.uptile img{max-width:100%;max-height:120px;border-radius:6px;display:block;margin:0 auto}
+.upswap{font-size:11px;color:var(--ok);font-weight:500;margin-top:4px}
+
+/* Info / summary panel (visit + docs pages) */
+.info{background:#F8FAFC;border:1px solid var(--bd);border-radius:var(--rl);padding:1.1rem 1.25rem;margin-bottom:1.25rem}
+.info .irow{display:flex;gap:10px;padding:5px 0;font-size:13.5px}
+.info .ik{color:var(--mu);min-width:118px;flex-shrink:0}
+.info .iv{color:var(--tx);font-weight:500;word-break:break-word}
+.badge{display:inline-block;background:var(--navy);color:#fff;font-size:11px;font-weight:500;border-radius:99px;padding:3px 10px;letter-spacing:.03em}
+.badge.ok{background:var(--ok)}
+
+.cardimgs{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px}
+.cardimgs a{display:block;border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;background:#fff}
+.cardimgs img{display:block;width:100%;height:auto}
+.cardimgs .clbl{font-size:11px;color:var(--mu);text-align:center;padding:6px}
+
+/* Generated-link box (intake success) */
+.linkbox{display:flex;gap:8px;align-items:stretch;margin:.75rem 0 1rem}
+.linkbox input{flex:1;font-size:13px;color:var(--mu)}
+.linkbox .btn{white-space:nowrap}
+
+.note{font-size:12px;color:var(--mu);background:#F8FAFC;border:1px solid var(--bd);border-radius:var(--r);padding:9px 12px;line-height:1.5;margin-bottom:1rem}
+.warn{font-size:13px;color:#92400E;background:#FFFBEB;border:1px solid #FDE68A;border-radius:var(--r);padding:10px 14px;line-height:1.5;margin-bottom:1rem}
+
+.loading{text-align:center;color:var(--mu);font-size:14px;padding:3rem 1rem}
+
+.docbtn{display:block;text-align:center;background:var(--pink);color:#fff;border-radius:var(--r);padding:14px;font-size:14px;font-weight:500;text-decoration:none;margin-bottom:1rem}
+.docbtn:hover{background:var(--pink2)}
+
+@media(max-width:520px){
+  .upgrid{grid-template-columns:1fr}
+  .cardimgs{grid-template-columns:1fr}
+  .info .irow{flex-direction:column;gap:1px}
+}

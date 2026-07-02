@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Attestation Visit — Clinician</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/yvy/yvy.css">
+</head>
+<body>
+<div class="wrap">
+
+<div class="hdr-mark">
+  <img src="https://ac4otvimls3ptbdw.public.blob.vercel-storage.com/Icon%20Only.png" alt="Premier Assist">
+</div>
+
+<div class="card loading" id="loadmsg">Loading…</div>
+
+<!-- ── STEP A: PATIENT SUMMARY ── -->
+<div class="step card" id="sA">
+  <div class="slbl">Visit details</div>
+  <div id="warnbox"></div>
+  <div class="info" id="summary"></div>
+
+  <div class="f" style="margin-bottom:12px">
+    <label>Insurance card</label>
+    <div class="cardimgs" id="cardimgs"></div>
+  </div>
+
+  <div class="row">
+    <div class="f"><label for="mcin">Medicaid ID (CIN) <span class="opt">optional</span></label><input type="text" id="mcin" placeholder="Client Identification Number"></div>
+    <div></div>
+  </div>
+
+  <div class="nav"><div></div><button class="btn btn-p" onclick="go('sB')">Begin attestation →</button></div>
+</div>
+
+<!-- ── STEP B: CRITERIA ── -->
+<div class="step card" id="sB">
+  <div class="slbl">Check all criteria that apply to this member</div>
+
+  <div class="cgrp">
+    <div class="chd">Behavioral &amp; Developmental Health Needs</div>
+    <label class="ci"><input type="checkbox" name="c" value="Substance Use Disorder (SUD)"><div><div class="cin">Substance Use Disorder (SUD)</div><div class="cid">Diagnosed with SUD (alcohol, opioids, marijuana, heroin, etc.) interfering with daily life, physical health, or involving illegal substance use.</div></div></label>
+    <label class="ci"><input type="checkbox" name="c" value="Severe Mental Illness (SMI)"><div><div class="cin">Severe Mental Illness (SMI)</div><div class="cid">Persistent or life-threatening mental health condition requiring stabilization — e.g., schizophrenia, bipolar disorder, or at risk of suicide.</div></div></label>
+    <label class="ci"><input type="checkbox" name="c" value="Intellectual or Developmental Disability (I/DD)"><div><div class="cin">Intellectual or Developmental Disability (I/DD)</div><div class="cid">Requires services/supports to achieve care goals — e.g., Autism, Cerebral Palsy, Epilepsy, Prader-Willi syndrome, Fetal Alcohol Syndrome.</div></div></label>
+  </div>
+
+  <div class="cgrp">
+    <div class="chd">Maternal &amp; Child Health</div>
+    <label class="ci"><input type="checkbox" name="c" value="Pregnant or up to 12 months postpartum"><div><div class="cin">Pregnant or up to 12 months postpartum</div><div class="cid">Currently pregnant or within 12 months of delivery, miscarriage, or termination.</div></div></label>
+    <label class="ci"><input type="checkbox" name="c" value="Pregnant / postpartum requiring refrigerated breast milk"><div><div class="cin">Pregnant / postpartum — requires refrigerated breast milk</div><div class="cid">Same postpartum window as above with documented need for breast milk refrigeration.</div></div></label>
+    <label class="ci"><input type="checkbox" name="c" value="High-risk child under 18"><div><div class="cin">High-risk child under 18</div><div class="cid">CYSHCN status, low birth weight (&lt;2500g), documented chronic condition, or history of maltreatment.</div></div></label>
+    <label class="ci"><input type="checkbox" name="c" value="Child under 18 — obese, underweight, or malnourished"><div><div class="cin">Child under 18 — obese, underweight, or malnourished</div><div class="cid">Child at risk of developmental/growth delay due to malnutrition, overweight, underweight, or obesity.</div></div></label>
+  </div>
+
+  <div class="cgrp">
+    <div class="chd">Special Medical Care — Adults (Medical Respite)</div>
+    <label class="ci"><input type="checkbox" name="c" value="Pre-procedure requirement"><div><div class="cin">Pre-procedure requirement</div><div class="cid">Member requires care or support in preparation for a scheduled procedure.</div></div></label>
+    <label class="ci"><input type="checkbox" name="c" value="Post-hospitalization care"><div><div class="cin">Post-hospitalization care</div><div class="cid">At risk for inpatient/ED hospitalization AND needs recuperation; OR transitioning from institution or acute care related to a health condition.</div></div></label>
+  </div>
+
+  <div class="cgrp">
+    <div class="chd">Nutritional &amp; Home Modification Needs</div>
+    <label class="ci"><input type="checkbox" name="c" value="Enteral or parenteral nutritional therapy"><div><div class="cin">Enteral or parenteral nutritional therapy</div><div class="cid">Member is receiving tube feeding or IV nutrition.</div></div></label>
+    <label class="ci"><input type="checkbox" name="c" value="Need for medically necessary home modifications"><div><div class="cin">Medically necessary home modifications</div><div class="cid">Physical disability requiring modifications for safety/access — e.g., ramps, handrails, grab bars.</div></div></label>
+    <label class="ci"><input type="checkbox" name="c" value="Health condition exacerbated by home environment"><div><div class="cin">Condition exacerbated by home environment</div><div class="cid">Condition worsened by moisture, mold, pests, or indoor air quality — e.g., asthma, COPD, environmental allergies, atopic dermatitis.</div></div></label>
+    <label class="ci"><input type="checkbox" name="c" value="Medical necessity for home remediation"><div><div class="cin">Medical necessity for home remediation</div><div class="cid">Documented need for mold or pest remediation in the home.</div></div></label>
+  </div>
+
+  <div class="cgrp">
+    <div class="chd">Environmental &amp; Temperature-Related</div>
+    <label class="ci"><input type="checkbox" name="c" value="Condition affecting thermoregulation"><div><div class="cin">Condition affecting thermoregulation</div><div class="cid">Medical condition or medications that significantly impair temperature regulation, including dependence on others for environmental control.</div></div></label>
+    <label class="ci"><input type="checkbox" name="c" value="Previous heat-related illness (ER/urgent care in last 12 months)"><div><div class="cin">Heat-related illness — ER or urgent care (last 12 months)</div><div class="cid">Visited ER or urgent care for a heat-related illness within the past year.</div></div></label>
+    <label class="ci"><input type="checkbox" name="c" value="Previous cold-related illness (ER/urgent care in last 12 months)"><div><div class="cin">Cold-related illness — ER or urgent care (last 12 months)</div><div class="cid">Visited ER or urgent care for a cold-related illness within the past year.</div></div></label>
+  </div>
+
+  <div class="cgrp">
+    <div class="chd">Chronic Health Conditions</div>
+    <label class="ci"><input type="checkbox" name="c" value="Chronic condition"><div><div class="cin">Chronic condition (DOH-listed)</div><div class="cid">Pre-diabetes, diabetes, chronic Hepatitis-C, CHF, chronic kidney disease, COPD, obesity, hypertension, malignancies, asthma, sickle cell, HIV/AIDS, Alzheimer's, arthritis, and others on the DOH list.</div></div></label>
+    <label class="ci"><input type="checkbox" name="c" value="Requires refrigerated medications for a chronic condition"><div><div class="cin">Requires refrigerated medications for chronic condition</div><div class="cid">Chronic condition management depends on refrigerated medications — e.g., certain insulins, biologics.</div></div></label>
+  </div>
+
+  <div class="cgrp">
+    <div class="chd">Asthma</div>
+    <label class="ci"><input type="checkbox" name="c" value="1+ inpatient hospital stay for asthma (last 12 months)"><div><div class="cin">1+ inpatient hospital stay for asthma (last 12 months)</div><div class="cid">At least one asthma-related hospital admission in the past year.</div></div></label>
+    <label class="ci"><input type="checkbox" name="c" value="2+ ED visits for asthma (last 12 months)"><div><div class="cin">2+ ED visits for asthma (last 12 months)</div><div class="cid">Two or more emergency department visits related to asthma in the past year.</div></div></label>
+    <label class="ci"><input type="checkbox" name="c" value="2+ urgent care visits for asthma (last 12 months)"><div><div class="cin">2+ urgent care visits for asthma (last 12 months)</div><div class="cid">Two or more urgent care visits related to asthma in the past year.</div></div></label>
+    <label class="ci"><input type="checkbox" name="c" value="2+ oral steroid prescribing events for asthma (last 12 months)"><div><div class="cin">2+ oral steroid prescriptions for asthma (last 12 months)</div><div class="cid">Two or more prescribing events for oral steroids related to asthma diagnosis in the past year.</div></div></label>
+    <label class="ci"><input type="checkbox" name="c" value="3–11 rescue inhaler prescriptions (last 12 months)"><div><div class="cin">3–11 rescue inhaler prescriptions (last 12 months)</div><div class="cid">Between 3 and 11 prescribing events for a rescue inhaler including albuterol — indicating frequent acute need.</div></div></label>
+  </div>
+
+  <div class="cgrp">
+    <div class="chd">Other</div>
+    <label class="ci"><input type="checkbox" name="c" value="Medicaid high utilizer"><div><div class="cin">Medicaid high utilizer</div><div class="cid">5+ ED visits in last 12 months; OR 4+ ED visits AND 1+ inpatient stays; OR 2+ inpatient stays in last 12 months.</div></div></label>
+    <label class="ci"><input type="checkbox" name="c" value="Enrolled in NYS Health Home"><div><div class="cin">Enrolled in NYS Health Home</div><div class="cid">Currently enrolled in a New York State Health Home care management program.</div></div></label>
+    <label class="ci"><input type="checkbox" name="c" value="Homeless"><div><div class="cin">Homeless</div><div class="cid">Literally homeless, facing imminent homelessness, homeless under federal regulations, or fleeing domestic violence. Per HUD definition (24 CFR 91.5).</div></div></label>
+    <label class="ci"><input type="checkbox" name="c" value="Transitioning out of institutional / congregate care (last 90 days)"><div><div class="cin">Transitioning out of institutional / congregate care (last 90 days)</div><div class="cid">Discharged within 90 days from a nursing facility, group home, correctional facility, State Psychiatric, SRO, or acute care hospital.</div></div></label>
+  </div>
+
+  <div class="nav">
+    <button class="btn" onclick="go('sA')">← Back</button>
+    <button class="btn btn-p" onclick="go('sC')">Next: Provider &amp; sign →</button>
+  </div>
+</div>
+
+<!-- ── STEP C: PROVIDER + SIGN ── -->
+<div class="step card" id="sC">
+
+  <div style="margin-bottom:1.75rem">
+    <div class="slbl">Select provider</div>
+    <div class="pgrid">
+      <div class="pc" onclick="selProv(this,'Esther Sobel')">
+        <div class="pav av-a">ES</div>
+        <div class="pnm">Esther Sobel</div>
+        <div class="pchk">✓</div>
+      </div>
+      <div class="pc" onclick="selProv(this,'Osnat Cohen')">
+        <div class="pav av-b">OC</div>
+        <div class="pnm">Osnat Cohen</div>
+        <div class="pchk">✓</div>
+      </div>
+      <div class="pc" onclick="selProv(this,'Jennifer Kahan')">
+        <div class="pav av-c">JK</div>
+        <div class="pnm">Jennifer Kahan</div>
+        <div class="pchk">✓</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slbl">Attestation</div>
+  <div class="attest">"I hereby attest that the information contained herein is current, complete, and accurate to the best of my knowledge and belief. I understand that my attestation may result in the provision of services which are paid for by state and federal funds and I also understand that whoever knowingly and willfully makes or causes to be made a false statement, or representation may be prosecuted under the applicable federal and state laws."</div>
+
+  <div style="margin-bottom:1rem">
+    <span class="siglbl">Provider signature</span>
+    <div class="sigwrap">
+      <div class="sighint" id="sighint">Draw signature here</div>
+      <canvas id="sigpad" width="600" height="180"></canvas>
+    </div>
+    <div class="sigfoot">
+      <button class="bclr" onclick="clearSig()">↺ Clear</button>
+      <span class="signote">Sign with mouse or finger</span>
+    </div>
+  </div>
+
+  <div class="row" style="margin-bottom:0">
+    <div class="f"><label for="sigdate">Date</label><input type="text" id="sigdate" data-mask="date" inputmode="numeric" placeholder="MM/DD/YYYY" maxlength="10"></div>
+    <div></div>
+  </div>
+
+  <div class="errmsg" id="errmsg"></div>
+
+  <div class="nav">
+    <button class="btn" onclick="go('sB')">← Back</button>
+    <button class="btn btn-p" id="subbtn" onclick="doSubmit()">Complete attestation</button>
+  </div>
+</div>
+
+<!-- ── SUCCESS ── -->
+<div class="step card" id="sok">
+  <div class="okwrap">
+    <div class="okicon">✓</div>
+    <h2>Attestation completed</h2>
+    <p>The signed attestation has been generated and Yeled V'Yalda has been notified by email.</p>
+    <a class="docbtn" id="pdflink" href="#" target="_blank" rel="noopener" style="max-width:320px;margin:0 auto 1rem">View signed PDF</a>
+  </div>
+</div>
+
+<!-- ── ERROR / NOT FOUND ── -->
+<div class="step card" id="sbad">
+  <div class="okwrap">
+    <div class="okicon" style="background:var(--er-bg);color:var(--er)">!</div>
+    <h2>Visit not found</h2>
+    <p>This link is not valid, or the visit record could not be loaded.</p>
+  </div>
+</div>
+
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const visitId = new URLSearchParams(location.search).get('id');
+let record = null, selProvider = '', hasSig = false;
+
+function show(id){['loadmsg','sA','sB','sC','sok','sbad'].forEach(s=>{const el=$(s);el.classList.remove('on');el.style.display=s==='loadmsg'?'none':''});$(id).classList.add('on');if(id==='loadmsg')$(id).style.display=''}
+function go(id){show(id);window.scrollTo({top:0,behavior:'smooth'});if(id==='sC')requestAnimationFrame(resizeCanvas)}
+
+function isoToMask(iso){const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(iso||'');return m?`${m[2]}/${m[3]}/${m[1]}`:iso||''}
+function fmtTime(hhmm){if(!hhmm)return'';const[h,m]=hhmm.split(':').map(Number);return`${((h+11)%12)+1}:${String(m).padStart(2,'0')} ${h>=12?'PM':'AM'}`}
+function esc(s){const d=document.createElement('div');d.textContent=s==null?'':String(s);return d.innerHTML}
+
+// ── INIT ────────────────────────────────────────────────────────
+(async function init(){
+  if(!visitId) return show('sbad');
+  try{
+    const res=await fetch('/api/yvy/record?id='+encodeURIComponent(visitId));
+    if(!res.ok) return show('sbad');
+    record=await res.json();
+  }catch{ return show('sbad') }
+
+  const s=record.submission||{};
+  const rows=[
+    ['Patient', record.firstName+' '+record.lastName],
+    ['DOB', isoToMask(record.dob)],
+    ['Language', record.language==='es'?'Spanish':'English'],
+    ['Lead Entity', record.leadEntity],
+    ['Visit', s.visitDate?isoToMask(s.visitDate)+' at '+fmtTime(s.visitTime):'—'],
+    ['Address', s.address?`${s.address}, ${s.city}, ${s.state} ${s.zip}`:'—'],
+    ['Insurance', s.insuranceCarrier?`${s.insuranceCarrier} — ${s.insuranceMemberId}`:'—'],
+    ['Filled out by', s.relationship?(s.relationship+(s.fillerName?` (${s.fillerName})`:'')):'—']
+  ];
+  $('summary').innerHTML = rows.map(([k,v])=>`<div class="irow"><span class="ik">${esc(k)}</span><span class="iv">${esc(v)}</span></div>`).join('');
+
+  if(s.cardFrontUrl){
+    $('cardimgs').innerHTML =
+      `<a href="${esc(s.cardFrontUrl)}" target="_blank" rel="noopener"><img src="${esc(s.cardFrontUrl)}" alt="Card front"><div class="clbl">Front — tap to enlarge</div></a>`+
+      `<a href="${esc(s.cardBackUrl)}" target="_blank" rel="noopener"><img src="${esc(s.cardBackUrl)}" alt="Card back"><div class="clbl">Back — tap to enlarge</div></a>`;
+  } else {
+    $('cardimgs').innerHTML='<div class="note" style="grid-column:1/-1;margin:0">No card photos uploaded yet.</div>';
+  }
+
+  if(record.status==='sent'){
+    $('warnbox').innerHTML='<div class="warn">The patient has not submitted their information yet.</div>';
+  } else if(record.status==='completed'){
+    const link=record.completion&&record.completion.pdfUrl;
+    $('warnbox').innerHTML='<div class="warn">This attestation was already completed'+(link?` — <a href="${esc(link)}" target="_blank" rel="noopener">view the signed PDF</a>. `:'. ')+'Submitting again will replace it.</div>';
+  }
+
+  show('sA');
+})();
+
+// ── PROVIDER PICKER ─────────────────────────────────────────────
+function selProv(el,name){
+  document.querySelectorAll('.pc').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');
+  selProvider=name;
+}
+
+// ── SIGNATURE PAD ───────────────────────────────────────────────
+const canvas=$('sigpad');
+const ctx=canvas.getContext('2d');
+function resizeCanvas(){
+  const r=canvas.getBoundingClientRect();
+  const dpr=window.devicePixelRatio||1;
+  canvas.width=Math.round(r.width*dpr);
+  canvas.height=Math.round(r.height*dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.strokeStyle='#183866';ctx.lineWidth=1.8;ctx.lineCap='round';ctx.lineJoin='round';
+}
+window.addEventListener('resize',()=>{resizeCanvas();hasSig=false;$('sighint').style.opacity='1'});
+let drawing=false;
+function getPos(e){const r=canvas.getBoundingClientRect();const s=e.touches?e.touches[0]:e;return{x:s.clientX-r.left,y:s.clientY-r.top}}
+canvas.addEventListener('mousedown',e=>{drawing=true;const p=getPos(e);ctx.beginPath();ctx.moveTo(p.x,p.y)});
+canvas.addEventListener('mousemove',e=>{if(!drawing)return;hasSig=true;$('sighint').style.opacity='0';const p=getPos(e);ctx.lineTo(p.x,p.y);ctx.stroke()});
+canvas.addEventListener('mouseup',()=>drawing=false);
+canvas.addEventListener('mouseleave',()=>drawing=false);
+canvas.addEventListener('touchstart',e=>{e.preventDefault();drawing=true;const p=getPos(e);ctx.beginPath();ctx.moveTo(p.x,p.y)},{passive:false});
+canvas.addEventListener('touchmove',e=>{e.preventDefault();if(!drawing)return;hasSig=true;$('sighint').style.opacity='0';const p=getPos(e);ctx.lineTo(p.x,p.y);ctx.stroke()},{passive:false});
+canvas.addEventListener('touchend',()=>drawing=false);
+canvas.addEventListener('touchcancel',()=>drawing=false);
+function clearSig(){ctx.clearRect(0,0,canvas.width,canvas.height);hasSig=false;$('sighint').style.opacity='1'}
+
+// ── DATE MASK ───────────────────────────────────────────────────
+function formatDateMask(d){d=d.replace(/\D/g,'').slice(0,8);let o=d.slice(0,2);if(d.length>=3)o+='/'+d.slice(2,4);if(d.length>=5)o+='/'+d.slice(4,8);return o}
+document.querySelectorAll('input[data-mask="date"]').forEach(el=>{
+  el.addEventListener('input',e=>{const del=e.inputType&&e.inputType.startsWith('delete');const f=formatDateMask(el.value);el.value=f;if(!del)el.setSelectionRange(f.length,f.length)});
+});
+function maskToIso(s){const m=/^(\d{2})\/(\d{2})\/(\d{4})$/.exec(s);return m?`${m[3]}-${m[1]}-${m[2]}`:''}
+function todayMask(){const d=new Date();return`${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}/${d.getFullYear()}`}
+$('sigdate').value=todayMask();
+
+// ── SUBMIT ──────────────────────────────────────────────────────
+function showErr(m){const e=$('errmsg');e.textContent=m;e.style.display='block';e.scrollIntoView({behavior:'smooth',block:'center'})}
+function clearErr(){$('errmsg').style.display='none'}
+
+async function doSubmit(){
+  clearErr();
+  if(!selProvider) return showErr('Please select a provider before submitting.');
+  if(!hasSig) return showErr('Provider signature is required.');
+
+  const checked=[...document.querySelectorAll('input[name=c]:checked')].map(el=>el.value);
+  const date=maskToIso($('sigdate').value)||maskToIso(todayMask());
+  const signature=canvas.toDataURL('image/png');
+
+  const btn=$('subbtn');btn.disabled=true;btn.textContent='Submitting…';
+  try{
+    const res=await fetch('/api/yvy/complete',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({id:visitId,cin:$('mcin').value.trim(),criteria:checked,provider:selProvider,date,signature})});
+    const data=await res.json().catch(()=>({error:'Invalid server response'}));
+    if(!res.ok||data.error)throw new Error(data.error||'Submission failed');
+
+    $('pdflink').href=data.pdfUrl;
+    show('sok');
+    window.scrollTo({top:0,behavior:'smooth'});
+  }catch(err){
+    showErr('Submission failed: '+err.message);
+    btn.disabled=false;btn.textContent='Complete attestation';
+  }
+}
+</script>
+</body>
+</html>
