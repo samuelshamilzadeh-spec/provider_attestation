@@ -91,7 +91,7 @@
 .uptile.err{border-color:var(--er)}
 .uptile.has{border-style:solid;border-color:var(--ok);background:var(--ok-bg);padding:.5rem}
 .uptile input{display:none}
-.upicon{font-size:22px}
+.upicon{color:var(--navy);display:block}
 .uplbl{font-size:12.5px;font-weight:500;color:#334155}
 .upnote{font-size:11px;color:var(--lt)}
 .uptile img{max-width:100%;max-height:120px;border-radius:6px;display:block;margin:0 auto}

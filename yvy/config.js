@@ -1,13 +1,11 @@
 // ── Yeled V'Yalda flow configuration ─────────────────────────────────────────
 // EDIT HERE: the SCN Lead Entity names YVY staff can choose from. The selected
 // name is printed in the "SCN Lead Entity Name" header on every page of the
-// attestation PDF — confirm exact spellings with Yeled V'Yalda before go-live.
+// attestation PDF.
 window.YVY_LEAD_ENTITIES = [
-  'HEALI',
-  'Public Health Solutions',
   'SOMOS',
-  'Hudson Valley Care Coalition',
-  'Staten Island PPS'
+  'HEALI',
+  'SIPPS'
 ];
 
 // Visit start-time windows by language (minutes since midnight), Mon–Fri.
