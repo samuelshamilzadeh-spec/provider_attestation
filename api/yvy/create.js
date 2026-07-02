@@ -112,28 +112,29 @@ export default async function handler(req, res) {
     let emailSent = false;
     if (record.patientEmail) {
       // No name or other sensitive detail in the patient invite — just a clean,
-      // branded prompt that explains why they're getting it (many won't connect
-      // "telehealth visit" to the Yeled V'Yalda food benefit on their own).
+      // branded prompt with the office's own wording.
       const copy = language === 'es'
         ? {
-            subject: 'Un paso para comenzar sus beneficios de alimentos',
-            heading: 'Un paso para comenzar sus beneficios',
+            subject: 'Programe su cita',
+            heading: 'Programe su cita',
             intro: [
-              'Usted se inscribió recientemente para recibir beneficios de alimentos y otros apoyos. Antes de que puedan comenzar, un proveedor de salud debe completar una breve certificación con usted durante una llamada telefónica corta. Es gratis y solo toma unos minutos.',
-              'Toque el botón de abajo para ingresar algunos datos y elegir el horario que mejor le convenga. Por favor tenga a la mano su tarjeta de seguro, ya que agregará una foto de ella en el formulario.'
+              'Gracias por su interés en programar una cita con nuestra oficina.',
+              'Esperamos conocerle. Durante su visita, uno de nuestros proveedores hablará con usted sobre sus necesidades de salud o las de su hijo/a. Si es apropiado según su evaluación, proporcionará la certificación necesaria.',
+              'Para programar su cita, por favor use el enlace a continuación para seleccionar la fecha y hora que le sea más conveniente.'
             ],
-            button: 'Programar mi visita',
-            footer: 'Un proveedor le llamará por teléfono a la hora que elija.'
+            button: 'Programar mi cita',
+            footer: 'Agradecemos la oportunidad de cuidar a su hijo/a y esperamos poder ayudar a su familia.'
           }
         : {
-            subject: 'One step to start your food benefits',
-            heading: 'One step to start your benefits',
+            subject: 'Schedule Your Appointment',
+            heading: 'Schedule Your Appointment',
             intro: [
-              "You recently signed up to receive food and other support benefits. Before they can begin, a healthcare provider needs to complete a short attestation with you during a brief phone visit. It's free and takes just a few minutes.",
-              "Tap the button below to enter a few details and choose a time that works for you. Please have your insurance card nearby, since you'll add a photo of it in the form."
+              'Thank you for your interest in scheduling an appointment with our office.',
+              "We look forward to meeting with you. During your visit, one of our providers will discuss yours/your child's health needs with you. If appropriate based on their evaluation, they will provide the necessary attestation.",
+              'To schedule your appointment, please use the link below to select the date and time that is most convenient for you.'
             ],
-            button: 'Schedule my visit',
-            footer: 'A provider will call you by phone at the time you choose.'
+            button: 'Schedule my appointment',
+            footer: 'We appreciate the opportunity to care for your child and look forward to assisting your family.'
           };
       try {
         await sendMail({
