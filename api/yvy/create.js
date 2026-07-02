@@ -112,27 +112,34 @@ export default async function handler(req, res) {
     let emailSent = false;
     if (record.patientEmail) {
       // No name or other sensitive detail in the patient invite — just a clean,
-      // branded prompt with a link to fill out the form.
+      // branded prompt that explains why they're getting it (many won't connect
+      // "telehealth visit" to the Yeled V'Yalda food benefit on their own).
       const copy = language === 'es'
         ? {
-            subject: 'Programe su visita de telesalud',
-            heading: 'Programe su visita de telesalud',
-            intro: 'Le pedimos que complete un formulario breve y elija un horario para su visita de telesalud. Toque el botón de abajo para comenzar; solo toma unos minutos.',
-            button: 'Completar mi formulario',
-            footer: 'Si no esperaba este correo, puede ignorarlo.'
+            subject: "Yeled V'Yalda: un paso para comenzar sus beneficios de alimentos",
+            heading: 'Un paso para comenzar sus beneficios',
+            intro: [
+              "Usted se inscribió recientemente con Yeled V'Yalda para recibir beneficios de alimentos y otros apoyos. Antes de que puedan comenzar, un proveedor de salud debe completar una breve certificación con usted durante una llamada telefónica corta. Es gratis y solo toma unos minutos.",
+              'Toque el botón de abajo para ingresar algunos datos y elegir el horario que mejor le convenga. Por favor tenga a la mano su tarjeta de seguro, ya que agregará una foto de ella en el formulario.'
+            ],
+            button: 'Programar mi visita',
+            footer: "Un proveedor le llamará por teléfono a la hora que elija. Si tiene preguntas, comuníquese con Yeled V'Yalda."
           }
         : {
-            subject: 'Schedule your telehealth visit',
-            heading: 'Schedule your telehealth visit',
-            intro: 'You have been asked to complete a short form and choose a time for your telehealth visit. Tap the button below to get started. It only takes a few minutes.',
-            button: 'Complete my form',
-            footer: 'If you were not expecting this email, you can ignore it.'
+            subject: "Yeled V'Yalda: one step to start your food benefits",
+            heading: 'One step to start your benefits',
+            intro: [
+              "You recently signed up with Yeled V'Yalda to receive food and other support benefits. Before they can begin, a healthcare provider needs to complete a short attestation with you during a brief phone visit. It's free and takes just a few minutes.",
+              "Tap the button below to enter a few details and choose a time that works for you. Please have your insurance card nearby, since you'll add a photo of it in the form."
+            ],
+            button: 'Schedule my visit',
+            footer: "A provider will call you by phone at the time you choose. If you have any questions, please contact Yeled V'Yalda."
           };
       try {
         await sendMail({
           to: record.patientEmail,
           subject: copy.subject,
-          text: `${copy.heading}\n\n${copy.intro}\n\n${patientLink}`,
+          text: `${copy.heading}\n\n${[].concat(copy.intro).join('\n\n')}\n\n${copy.button}: ${patientLink}\n\n${copy.footer}`,
           html: renderEmail({ heading: copy.heading, intro: copy.intro, buttonText: copy.button, buttonUrl: patientLink, footerNote: copy.footer })
         });
         emailSent = true;
