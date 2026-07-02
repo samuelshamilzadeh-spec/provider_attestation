@@ -21,35 +21,21 @@
 <!-- ── FORM ── -->
 <div class="step card" id="sform">
 
-  <div class="slbl" data-t="yourInfo"></div>
-  <div class="row">
-    <div class="f"><label data-t="firstName"></label><input type="text" id="fn" readonly></div>
-    <div class="f"><label data-t="lastName"></label><input type="text" id="ln" readonly></div>
-  </div>
-  <div class="row">
-    <div class="f"><label data-t="dob"></label><input type="text" id="dob" readonly></div>
-    <div></div>
-  </div>
+  <div class="who" id="whobox"></div>
 
-  <div class="slbl" style="margin-top:1.5rem" data-t="address"></div>
-  <div class="row full">
-    <div class="f"><label for="addr" data-t="street"></label><input type="text" id="addr" autocomplete="street-address"></div>
-  </div>
-  <div class="row">
-    <div class="f"><label for="city" data-t="city"></label><input type="text" id="city" autocomplete="address-level2"></div>
-    <div class="f" style="display:grid;grid-template-columns:1fr 1.4fr;gap:12px">
-      <div class="f"><label for="state" data-t="state"></label><input type="text" id="state" value="NY" maxlength="2" autocomplete="address-level1"></div>
-      <div class="f"><label for="zip" data-t="zip"></label><input type="text" id="zip" inputmode="numeric" maxlength="10" autocomplete="postal-code"></div>
-    </div>
+  <div class="slbl" data-t="address"></div>
+  <div class="ff"><label for="addr" data-t="street"></label><input type="text" id="addr" data-ph="phStreet" placeholder="123 Main St" autocomplete="street-address"></div>
+  <div class="ff"><label for="city" data-t="city"></label><input type="text" id="city" data-ph="phCity" placeholder="Brooklyn" autocomplete="address-level2"></div>
+  <div class="ffrow narrow-right">
+    <div class="ff"><label for="state" data-t="state"></label><input type="text" id="state" value="NY" maxlength="2" data-ph="phState" placeholder="NY" autocomplete="address-level1"></div>
+    <div class="ff"><label for="zip" data-t="zip"></label><input type="text" id="zip" inputmode="numeric" maxlength="10" data-ph="phZip" placeholder="11204" autocomplete="postal-code"></div>
   </div>
 
   <div class="slbl" style="margin-top:1.5rem" data-t="insurance"></div>
-  <div class="row">
-    <div class="f"><label for="carrier" data-t="carrier"></label><input type="text" id="carrier"></div>
-    <div class="f"><label for="memberid" data-t="memberId"></label><input type="text" id="memberid"></div>
-  </div>
+  <div class="ff"><label for="carrier" data-t="carrier"></label><input type="text" id="carrier" data-ph="phCarrier" placeholder="Fidelis Care"></div>
+  <div class="ff"><label for="memberid" data-t="memberId"></label><input type="text" id="memberid" data-ph="phMember" placeholder="Member ID"></div>
   <div class="f" style="margin-bottom:12px">
-    <label data-t="cardPhotos"></label>
+    <label class="flbl" data-t="cardPhotos"></label>
     <div class="upgrid">
       <label class="uptile" id="tile-front">
         <input type="file" accept="image/*" onchange="pickImage(this,'front')">
@@ -67,22 +53,23 @@
   </div>
 
   <div class="slbl" style="margin-top:1.5rem" data-t="whoFilling"></div>
-  <div class="row">
-    <div class="f">
-      <label for="rel" data-t="relationship"></label>
-      <select id="rel"></select>
-    </div>
-    <div class="f" id="fillerwrap" style="display:none">
-      <label for="filler" data-t="fillerName"></label>
-      <input type="text" id="filler">
-    </div>
+  <div class="ff">
+    <label for="rel" data-t="relationship"></label>
+    <select id="rel" required><option value="" selected disabled hidden></option></select>
+  </div>
+  <div class="ff" id="fillerwrap" style="display:none">
+    <label for="filler" data-t="fillerName"></label>
+    <input type="text" id="filler" data-ph="phName" placeholder="Full name">
   </div>
 
   <div class="slbl" style="margin-top:1.5rem" data-t="schedule"></div>
   <div class="note" id="schednote"></div>
-  <div class="row">
-    <div class="f"><label for="vdate" data-t="visitDate"></label><input type="date" id="vdate"></div>
-    <div class="f"><label for="vtime" data-t="visitTime"></label><select id="vtime"></select></div>
+  <div class="ffrow">
+    <div class="ff"><label for="vdate" data-t="visitDate"></label><input type="text" id="vdate" data-mask="date" inputmode="numeric" placeholder="MM/DD/YYYY" maxlength="10"></div>
+    <div class="ff">
+      <label for="vtime" data-t="visitTime"></label>
+      <select id="vtime" required><option value="" selected disabled hidden></option></select>
+    </div>
   </div>
 
   <div class="errmsg" id="errmsg"></div>
@@ -114,14 +101,14 @@
 <script>
 const $ = id => document.getElementById(id);
 const params = new URLSearchParams(location.search);
-const visitId = params.get('id');
+const token = params.get('t');
 let record = null, lang = 'en';
 const images = { front: null, back: null };
 
 // ── i18n ────────────────────────────────────────────────────────
 const T = {
   en: {
-    yourInfo:'Your information', firstName:'First name', lastName:'Last name', dob:'Date of birth',
+    formFor:'This form is for', dobLabel:'Date of birth',
     address:'Home address', street:'Street address', city:'City', state:'State', zip:'ZIP code',
     insurance:'Insurance', carrier:'Insurance carrier', memberId:'Insurance member ID',
     cardPhotos:'Insurance card photos', cardFront:'Front of card', cardBack:'Back of card',
@@ -131,12 +118,15 @@ const T = {
     rels:['Self','Parent','Legal guardian','Spouse','Other family member','Other'],
     schedule:'Schedule your visit',
     schedNote:'Visits are by phone, Monday through Friday, between {open} and {close}.',
-    visitDate:'Visit date', visitTime:'Visit time', pickTime:'Select a time…',
+    visitDate:'Visit date', visitTime:'Visit time',
     submit:'Submit', submitting:'Submitting…',
+    phStreet:'123 Main St', phCity:'Brooklyn', phState:'NY', phZip:'11204',
+    phCarrier:'e.g. Fidelis Care', phMember:'Member ID', phName:'Full name',
     okTitle:'Thank you!',
     okText:'Your visit has been scheduled for {when}. A clinician will call you at that time.',
     errFields:'Please complete the highlighted fields.',
     errPhotos:'Please upload photos of the front and back of your insurance card.',
+    errDate:'Please enter a valid visit date (MM/DD/YYYY).',
     errWeekend:'Please choose a weekday (Monday to Friday).',
     errPast:'Please choose a date in the future.',
     errSubmit:'Submission failed: ',
@@ -145,7 +135,7 @@ const T = {
     notFoundTitle:'Link not found', notFoundText:'This link is not valid. Please contact the office for a new link.'
   },
   es: {
-    yourInfo:'Su información', firstName:'Nombre', lastName:'Apellido', dob:'Fecha de nacimiento',
+    formFor:'Este formulario es para', dobLabel:'Fecha de nacimiento',
     address:'Dirección de casa', street:'Dirección', city:'Ciudad', state:'Estado', zip:'Código postal',
     insurance:'Seguro médico', carrier:'Compañía de seguro', memberId:'Número de miembro del seguro',
     cardPhotos:'Fotos de la tarjeta de seguro', cardFront:'Frente de la tarjeta', cardBack:'Reverso de la tarjeta',
@@ -155,12 +145,15 @@ const T = {
     rels:['Yo mismo/a','Padre/Madre','Tutor legal','Cónyuge','Otro familiar','Otro'],
     schedule:'Programe su visita',
     schedNote:'Las visitas son por teléfono, de lunes a viernes, entre {open} y {close}.',
-    visitDate:'Fecha de la visita', visitTime:'Hora de la visita', pickTime:'Seleccione una hora…',
+    visitDate:'Fecha de la visita', visitTime:'Hora de la visita',
     submit:'Enviar', submitting:'Enviando…',
+    phStreet:'123 Calle Principal', phCity:'Brooklyn', phState:'NY', phZip:'11204',
+    phCarrier:'p. ej. Fidelis Care', phMember:'Número de miembro', phName:'Nombre completo',
     okTitle:'¡Gracias!',
     okText:'Su visita ha sido programada para el {when}. Un clínico le llamará a esa hora.',
     errFields:'Por favor complete los campos marcados.',
     errPhotos:'Por favor suba fotos del frente y reverso de su tarjeta de seguro.',
+    errDate:'Por favor ingrese una fecha de visita válida (MM/DD/AAAA).',
     errWeekend:'Por favor elija un día entre lunes y viernes.',
     errPast:'Por favor elija una fecha futura.',
     errSubmit:'Error al enviar: ',
@@ -176,17 +169,29 @@ function fmtMins(mins){
   return `${((h+11)%12)+1}:${String(m).padStart(2,'0')} ${am}`;
 }
 function isoToMask(iso){const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(iso||'');return m?`${m[2]}/${m[3]}/${m[1]}`:iso||''}
+function esc(s){const d=document.createElement('div');d.textContent=s==null?'':String(s);return d.innerHTML}
 
 function show(id){['loadmsg','sform','sok','sbad'].forEach(s=>{const el=$(s);el.classList.remove('on');el.style.display=s==='loadmsg'?'none':''});$(id).classList.add('on');if(id==='loadmsg')$(id).style.display=''}
 function showErr(m){const e=$('errmsg');e.textContent=m;e.style.display='block';e.scrollIntoView({behavior:'smooth',block:'center'})}
 function clearErr(){$('errmsg').style.display='none'}
-function mark(id,bad){const el=$(id);el.classList.toggle('err',bad);el.addEventListener('input',()=>el.classList.remove('err'),{once:true})}
+function mark(id,bad){
+  const el=$(id), ff=el.closest('.ff')||el;
+  ff.classList.toggle('err',bad);
+  const clear=()=>ff.classList.remove('err');
+  el.addEventListener('input',clear,{once:true});
+  el.addEventListener('change',clear,{once:true});
+}
+
+// Date mask + validation
+function formatDateMask(d){d=d.replace(/\D/g,'').slice(0,8);let o=d.slice(0,2);if(d.length>=3)o+='/'+d.slice(2,4);if(d.length>=5)o+='/'+d.slice(4,8);return o}
+function isValidDate(s){const m=/^(\d{2})\/(\d{2})\/(\d{4})$/.exec(s);if(!m)return false;const d=new Date(+m[3],+m[1]-1,+m[2]);return d.getFullYear()===+m[3]&&d.getMonth()===+m[1]-1&&d.getDate()===+m[2]}
+function maskToIso(s){const m=/^(\d{2})\/(\d{2})\/(\d{4})$/.exec(s);return m?`${m[3]}-${m[1]}-${m[2]}`:''}
 
 // ── INIT ────────────────────────────────────────────────────────
 (async function init(){
-  if(!visitId) return fail('notFound');
+  if(!token) return fail('notFound');
   try{
-    const res=await fetch('/api/yvy/record?id='+encodeURIComponent(visitId));
+    const res=await fetch('/api/yvy/record?role=patient&t='+encodeURIComponent(token));
     if(!res.ok) return fail('notFound');
     record=await res.json();
   }catch{ return fail('notFound') }
@@ -196,38 +201,32 @@ function mark(id,bad){const el=$(id);el.classList.toggle('err',bad);el.addEventL
 
   if(record.status==='completed') return fail('completed');
 
-  // Static labels
+  // Static labels + translated placeholders
   document.querySelectorAll('[data-t]').forEach(el=>{el.textContent=t(el.dataset.t)});
+  document.querySelectorAll('[data-ph]').forEach(el=>{el.placeholder=t(el.dataset.ph)});
   document.title = lang==='es' ? 'Formulario de visita' : 'Visit Form';
 
-  // Prefilled identity
-  $('fn').value=record.firstName; $('ln').value=record.lastName; $('dob').value=isoToMask(record.dob);
+  // Identity confirmation banner
+  $('whobox').innerHTML = `${esc(t('formFor'))} <b>${esc(record.firstName+' '+record.lastName)}</b><br><span class="whodob">${esc(t('dobLabel'))}: ${esc(isoToMask(record.dob))}</span>`;
 
-  // Relationship options
+  // Relationship options (canonical English values, translated labels)
   const rel=$('rel');
-  t('rels').forEach((r,i)=>{const o=document.createElement('option');o.value=T.en.rels[i];o.textContent=r;rel.appendChild(o)});
-  rel.addEventListener('change',()=>{ $('fillerwrap').style.display = rel.selectedIndex===0 ? 'none':'flex' });
+  t('rels').forEach((label,i)=>{const o=document.createElement('option');o.value=T.en.rels[i];o.textContent=label;rel.appendChild(o)});
+  rel.addEventListener('change',()=>{ $('fillerwrap').style.display = (rel.value && rel.value!=='Self') ? 'block':'none' });
 
-  // Schedule
+  // Date mask for visit date
+  $('vdate').addEventListener('input',e=>{const el=e.target;const del=e.inputType&&e.inputType.startsWith('delete');const f=formatDateMask(el.value);el.value=f;if(!del)el.setSelectionRange(f.length,f.length)});
+
+  // Schedule window + time slots (gated by language)
   const w = window.YVY_SCHEDULE[lang] || window.YVY_SCHEDULE.en;
   $('schednote').textContent = t('schedNote').replace('{open}',fmtMins(w.open)).replace('{close}',fmtMins(w.close));
   const vt=$('vtime');
-  const ph=document.createElement('option');ph.value='';ph.disabled=true;ph.selected=true;ph.textContent=t('pickTime');vt.appendChild(ph);
   for(let m=w.open; m+window.YVY_SCHEDULE.slotMinutes<=w.close; m+=window.YVY_SCHEDULE.slotMinutes){
     const o=document.createElement('option');
     o.value=`${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`;
     o.textContent=fmtMins(m);
     vt.appendChild(o);
   }
-  const today=new Date();
-  $('vdate').min=`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
-  $('vdate').addEventListener('change',()=>{
-    clearErr();
-    const v=$('vdate').value; if(!v)return;
-    const [y,mo,d]=v.split('-').map(Number);
-    const dow=new Date(y,mo-1,d).getDay();
-    if(dow===0||dow===6){ $('vdate').value=''; mark('vdate',true); showErr(t('errWeekend')); }
-  });
 
   if(record.status==='scheduled'){
     const warn=document.createElement('div');warn.className='warn';warn.textContent=t('already');
@@ -270,13 +269,26 @@ function pickImage(input, side){
 }
 
 // ── SUBMIT ──────────────────────────────────────────────────────
+function isWeekend(iso){const [y,mo,d]=iso.split('-').map(Number);const dow=new Date(y,mo-1,d).getDay();return dow===0||dow===6}
+function isPast(iso){const [y,mo,d]=iso.split('-').map(Number);const pick=new Date(y,mo-1,d);const today=new Date();today.setHours(0,0,0,0);return pick<today}
+
 async function doSubmit(){
   clearErr();
   let bad=false;
   ['addr','city','state','zip','carrier','memberid'].forEach(id=>{if(!$(id).value.trim()){mark(id,true);bad=true}});
-  if(!$('vdate').value){mark('vdate',true);bad=true}
+  if($('rel').selectedIndex<=0){mark('rel',true);bad=true}
   if(!$('vtime').value){mark('vtime',true);bad=true}
-  if(bad) return showErr(t('errFields'));
+
+  const dateMask=$('vdate').value;
+  let dateErr='';
+  if(!isValidDate(dateMask)){mark('vdate',true);bad=true;dateErr=t('errDate')}
+  else{
+    const iso=maskToIso(dateMask);
+    if(isWeekend(iso)){mark('vdate',true);bad=true;dateErr=t('errWeekend')}
+    else if(isPast(iso)){mark('vdate',true);bad=true;dateErr=t('errPast')}
+  }
+
+  if(bad) return showErr(dateErr || t('errFields'));
   if(!images.front||!images.back){
     if(!images.front)$('tile-front').classList.add('err');
     if(!images.back)$('tile-back').classList.add('err');
@@ -287,19 +299,19 @@ async function doSubmit(){
   try{
     const res=await fetch('/api/yvy/patient-submit',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
-        id:visitId,
+        t:token,
         address:$('addr').value.trim(), city:$('city').value.trim(),
         state:$('state').value.trim(), zip:$('zip').value.trim(),
         insuranceCarrier:$('carrier').value.trim(), insuranceMemberId:$('memberid').value.trim(),
         relationship:$('rel').value, fillerName:$('filler').value.trim(),
-        visitDate:$('vdate').value, visitTime:$('vtime').value,
+        visitDate:maskToIso(dateMask), visitTime:$('vtime').value,
         cardFront:images.front, cardBack:images.back
       })});
     const data=await res.json().catch(()=>({error:'Invalid server response'}));
     if(!res.ok||data.error)throw new Error(data.error||'Submission failed');
 
     const [h,m]=$('vtime').value.split(':').map(Number);
-    const when=`${isoToMask($('vdate').value)} — ${fmtMins(h*60+m)}`;
+    const when=`${isoToMask(maskToIso(dateMask))} — ${fmtMins(h*60+m)}`;
     $('oktext').textContent=t('okText').replace('{when}',when);
     show('sok');
     window.scrollTo({top:0,behavior:'smooth'});

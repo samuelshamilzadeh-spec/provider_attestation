@@ -1,17 +1,88 @@
-/* Additions used by the Yeled V'Yalda pages (loaded after /style.css) */
+/* Additions used by the Yeled V'Yalda pages (loaded after /style.css).
+   Everything here uses the site font (DM Sans, var(--font)) so the YVY intake,
+   patient and visit pages read as one system with the rest of the app. */
 
-select{height:42px;padding:0 12px;border:1px solid var(--bd);border-radius:var(--r);font-family:var(--font);font-size:16px;color:var(--tx);background:#fff;outline:none;transition:border-color .15s,box-shadow .15s;width:100%;appearance:auto}
-select:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(24,56,102,.07)}
-select.err{border-color:var(--er)}
-select:disabled{background:#F1F5F9;color:var(--lt)}
+/* ══════════════════════════════════════════════════════════════════
+   FLOATING-LABEL FIELDS  (.ff)
+   Structure:
+     <div class="ff">
+       <label for="x">Label</label>
+       <input id="x" placeholder="Hint" />
+     </div>
+   The <input> MUST carry a non-empty placeholder — the effect keys off
+   :placeholder-shown. Selects use an empty, disabled, `value=""` first option
+   plus `required`, so the label floats only once a real choice is made.
+   ══════════════════════════════════════════════════════════════════ */
+.ff{position:relative;margin-bottom:22px}
+.ff:last-child{margin-bottom:0}
 
-input[readonly]{background:#F8FAFC;color:var(--mu)}
+.ff input,
+.ff select{
+  width:100%;box-sizing:border-box;height:54px;padding:16px 14px;
+  font-family:var(--font);font-size:15px;color:var(--tx);background:#fff;
+  border:1.5px solid var(--bd);border-radius:var(--r);outline:none;
+  transition:border-color .18s ease,box-shadow .18s ease;
+}
+.ff select{
+  appearance:none;-webkit-appearance:none;-moz-appearance:none;
+  padding-right:40px;cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='none' stroke='%2364748B' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round' d='M1 1.5 6 6.5 11 1.5'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 14px center;
+}
+.ff input:focus,
+.ff select:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(24,56,102,.07)}
+
+/* Label — resting: sits inside the box like a placeholder. */
+.ff label{
+  position:absolute;top:16px;left:10px;padding:0 4px;
+  font-family:var(--font);font-size:15px;font-weight:400;line-height:1.2;
+  color:var(--lt);background:transparent;pointer-events:none;
+  transform-origin:left center;transition:all .18s ease;z-index:2;
+  max-width:calc(100% - 28px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+
+/* Label — floated: raises onto the border and shrinks. Triggered by focus,
+   a filled input, or a select with a real (valid) choice. */
+.ff:focus-within label,
+.ff:has(input:not(:placeholder-shown)) label,
+.ff:has(select:valid) label{
+  top:0;transform:translateY(-50%) scale(.84);
+  font-weight:500;color:var(--navy);background:#fff;
+}
+
+/* Hide the native placeholder under the resting label; reveal it on focus so
+   format hints (MM/DD/YYYY) appear once the label has floated up. */
+.ff input::placeholder{color:transparent}
+.ff input:focus::placeholder{color:var(--lt)}
+
+.ff.err input,
+.ff.err select{border-color:var(--er)}
+.ff.err label{color:var(--er)}
+.ff .req{color:var(--pink);margin-left:1px}
+
+.ff input[readonly]{background:#F8FAFC;color:var(--mu);cursor:default}
+
+/* Small helper text under a field (for hints that don't fit in a label). */
+.fhint{font-size:11.5px;color:var(--mu);margin:6px 2px 0;line-height:1.5}
+
+/* Two-up row of floating fields. */
+.ffrow{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:22px}
+.ffrow.narrow-right{grid-template-columns:1fr 1.3fr}
+.ffrow .ff{margin-bottom:0}
+
+/* Static label above a non-input control (language segmented control). */
+.flbl{font-size:12.5px;font-weight:500;color:var(--navy);margin-bottom:8px;display:block}
 
 /* Language segmented control */
 .seg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.seg .sopt{border:1.5px solid var(--bd);border-radius:var(--r);padding:11px 8px;text-align:center;font-size:14px;font-weight:500;cursor:pointer;background:#fff;user-select:none;transition:all .15s;-webkit-tap-highlight-color:transparent}
+.seg .sopt{border:1.5px solid var(--bd);border-radius:var(--r);padding:15px 8px;text-align:center;font-size:15px;font-weight:500;cursor:pointer;background:#fff;user-select:none;transition:all .15s;-webkit-tap-highlight-color:transparent}
 .seg .sopt:hover{background:#F8FAFC}
 .seg .sopt.sel{border-color:var(--navy);background:#F0F4F8;box-shadow:0 0 0 3px rgba(24,56,102,.07)}
+
+/* Identity confirmation banner (patient page) */
+.who{background:#F0F4F8;border:1px solid #DCE5F0;border-radius:var(--rl);padding:.9rem 1.1rem;margin-bottom:1.5rem;font-size:14px;color:var(--navy);line-height:1.5}
+.who b{font-weight:500}
+.who .whodob{color:var(--mu);font-size:13px}
 
 /* Photo upload tiles */
 .upgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -41,7 +112,7 @@ input[readonly]{background:#F8FAFC;color:var(--mu)}
 
 /* Generated-link box (intake success) */
 .linkbox{display:flex;gap:8px;align-items:stretch;margin:.75rem 0 1rem}
-.linkbox input{flex:1;font-size:13px;color:var(--mu)}
+.linkbox input{flex:1;height:44px;padding:0 12px;border:1px solid var(--bd);border-radius:var(--r);font-family:var(--font);font-size:13px;color:var(--mu);background:#F8FAFC;outline:none}
 .linkbox .btn{white-space:nowrap}
 
 .note{font-size:12px;color:var(--mu);background:#F8FAFC;border:1px solid var(--bd);border-radius:var(--r);padding:9px 12px;line-height:1.5;margin-bottom:1rem}
@@ -53,6 +124,8 @@ input[readonly]{background:#F8FAFC;color:var(--mu)}
 .docbtn:hover{background:var(--pink2)}
 
 @media(max-width:520px){
+  .ffrow,.ffrow.narrow-right{grid-template-columns:1fr;gap:0}
+  .ffrow .ff{margin-bottom:22px}
   .upgrid{grid-template-columns:1fr}
   .cardimgs{grid-template-columns:1fr}
   .info .irow{flex-direction:column;gap:1px}

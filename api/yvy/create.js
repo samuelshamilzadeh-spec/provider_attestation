@@ -1,9 +1,9 @@
 import crypto from 'crypto';
-import { assertBlobConfigured, saveRecord, siteOrigin } from '../../lib/store.js';
-import { sendMail } from '../../lib/notify.js';
+import { assertBlobConfigured, saveRecord, saveTokenIndex, siteOrigin } from '../../lib/store.js';
+import { sendMail, renderEmail } from '../../lib/notify.js';
 
-// Staff intake: creates a visit record and (optionally) emails the patient
-// their personalized link.
+// Staff intake: creates a visit record with three independent role tokens and
+// (optionally) emails the patient their personalized link.
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
@@ -25,6 +25,10 @@ export default async function handler(req, res) {
     assertBlobConfigured();
 
     const id = crypto.randomUUID();
+    const patientToken = crypto.randomUUID();
+    const visitToken   = crypto.randomUUID();
+    const docsToken    = crypto.randomUUID();
+
     const record = {
       id,
       createdAt: new Date().toISOString(),
@@ -34,33 +38,52 @@ export default async function handler(req, res) {
       dob,
       language,
       leadEntity: leadEntity.trim(),
-      patientEmail: (patientEmail || '').trim()
+      patientEmail: (patientEmail || '').trim(),
+      patientToken,
+      visitToken,
+      docsToken
     };
     await saveRecord(record);
+    await Promise.all([
+      saveTokenIndex(patientToken, id, 'patient'),
+      saveTokenIndex(visitToken, id, 'visit'),
+      saveTokenIndex(docsToken, id, 'docs')
+    ]);
 
-    const patientLink = `${siteOrigin(req)}/yvy/patient?id=${id}`;
+    const patientLink = `${siteOrigin(req)}/yvy/patient?t=${patientToken}`;
 
     let emailSent = false;
     if (record.patientEmail) {
-      const en = {
-        subject: 'Please complete your visit form',
-        text: `Hello ${record.firstName},\n\nPlease complete your information and choose a visit time using your personal link below:\n\n${patientLink}\n\nThank you.`
-      };
-      const es = {
-        subject: 'Por favor complete su formulario de visita',
-        text: `Hola ${record.firstName},\n\nPor favor complete su información y elija un horario de visita usando su enlace personal a continuación:\n\n${patientLink}\n\nGracias.`
-      };
-      const msg = language === 'es' ? es : en;
+      const copy = language === 'es'
+        ? {
+            subject: 'Por favor complete su formulario de visita',
+            heading: `Hola ${record.firstName},`,
+            intro: 'Por favor complete su información y elija un horario de visita usando su enlace personal a continuación.',
+            button: 'Completar mi formulario',
+            footer: 'Si no esperaba este correo, puede ignorarlo.'
+          }
+        : {
+            subject: 'Please complete your visit form',
+            heading: `Hello ${record.firstName},`,
+            intro: 'Please complete your information and choose a visit time using your personal link below.',
+            button: 'Complete my form',
+            footer: 'If you were not expecting this email, you can ignore it.'
+          };
       try {
-        await sendMail({ to: record.patientEmail, subject: msg.subject, text: msg.text });
+        await sendMail({
+          to: record.patientEmail,
+          subject: copy.subject,
+          text: `${copy.heading}\n\n${copy.intro}\n\n${patientLink}`,
+          html: renderEmail({ heading: copy.heading, intro: copy.intro, buttonText: copy.button, buttonUrl: patientLink, footerNote: copy.footer })
+        });
         emailSent = true;
       } catch (err) {
         // Surface the failure but still return the link so staff can send it manually.
-        return res.status(200).json({ id, patientLink, emailSent: false, emailError: err.message });
+        return res.status(200).json({ patientLink, emailSent: false, emailError: err.message });
       }
     }
 
-    return res.status(200).json({ id, patientLink, emailSent });
+    return res.status(200).json({ patientLink, emailSent });
   } catch (err) {
     return res.status(500).json({ error: err.message || 'Internal error' });
   }

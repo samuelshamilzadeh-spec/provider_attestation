@@ -1,5 +1,5 @@
-import { assertBlobConfigured, loadRecord, saveRecord, uploadDataUrl, siteOrigin } from '../../lib/store.js';
-import { sendMail, postTeamsCard } from '../../lib/notify.js';
+import { assertBlobConfigured, loadRecordByToken, saveRecord, uploadDataUrl, siteOrigin } from '../../lib/store.js';
+import { sendMail, postTeamsCard, renderEmail } from '../../lib/notify.js';
 
 export const config = { api: { bodyParser: { sizeLimit: '4mb' } } };
 
@@ -48,14 +48,14 @@ export default async function handler(req, res) {
     try { body = JSON.parse(body); } catch { return res.status(400).json({ error: 'Invalid JSON body' }); }
   }
   const {
-    id, address, city, state, zip, insuranceCarrier, insuranceMemberId,
+    t, address, city, state, zip, insuranceCarrier, insuranceMemberId,
     relationship, fillerName, visitDate, visitTime, cardFront, cardBack
   } = body || {};
 
   try {
     assertBlobConfigured();
 
-    const record = await loadRecord(id);
+    const record = await loadRecordByToken(t, 'patient');
     if (!record) return res.status(404).json({ error: 'Visit not found' });
     if (record.status === 'completed') return res.status(409).json({ error: 'This visit has already been completed.' });
 
@@ -72,8 +72,8 @@ export default async function handler(req, res) {
     if (slotErr) return res.status(400).json({ error: slotErr });
 
     const [cardFrontUrl, cardBackUrl] = await Promise.all([
-      uploadDataUrl(`yvy/cards/${id}-front.jpg`, cardFront),
-      uploadDataUrl(`yvy/cards/${id}-back.jpg`, cardBack)
+      uploadDataUrl(`yvy/cards/${record.id}-front.jpg`, cardFront),
+      uploadDataUrl(`yvy/cards/${record.id}-back.jpg`, cardBack)
     ]);
 
     record.status = 'scheduled';
@@ -94,13 +94,23 @@ export default async function handler(req, res) {
     };
     await saveRecord(record);
 
-    const visitLink = `${siteOrigin(req)}/yvy/visit?id=${id}`;
+    // The clinician link carries the VISIT token and is only ever sent here, to
+    // the office — the patient never receives it.
+    const visitLink = `${siteOrigin(req)}/yvy/visit?t=${record.visitToken}`;
     const patientName = `${record.firstName} ${record.lastName}`;
     const when = `${fmtDate(visitDate)} at ${fmtTime(visitTime)}`;
     const langLabel = record.language === 'es' ? 'Spanish' : 'English';
 
     const notifications = [];
     if (process.env.OFFICE_EMAIL) {
+      const rows = [
+        ['Patient', patientName],
+        ['Date of birth', fmtDate(record.dob)],
+        ['Language', langLabel],
+        ['Lead Entity', record.leadEntity],
+        ['Appointment Time', when],
+        ['Insurance', `${record.submission.insuranceCarrier} — ${record.submission.insuranceMemberId}`]
+      ];
       notifications.push(sendMail({
         to: process.env.OFFICE_EMAIL,
         subject: `New Provider Attestation Visit — ${patientName} — ${when}`,
@@ -115,7 +125,15 @@ Visit:        ${when}
 Insurance:    ${record.submission.insuranceCarrier} — ${record.submission.insuranceMemberId}
 
 Open the visit form at the time of the visit:
-${visitLink}`
+${visitLink}`,
+        html: renderEmail({
+          heading: 'New attestation visit',
+          intro: 'A patient just completed their intake. Review the details below and complete the attestation at the time of the visit.',
+          rows,
+          buttonText: 'Complete Attestation',
+          buttonUrl: visitLink,
+          footerNote: 'Premier Assist · Provider Attestation'
+        })
       }).catch(err => console.error('Office email failed:', err.message)));
     }
     notifications.push(postTeamsCard({

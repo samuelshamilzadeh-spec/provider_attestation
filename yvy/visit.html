@@ -25,14 +25,12 @@
   <div class="info" id="summary"></div>
 
   <div class="f" style="margin-bottom:12px">
-    <label>Insurance card</label>
+    <label class="flbl">Insurance card</label>
     <div class="cardimgs" id="cardimgs"></div>
   </div>
 
-  <div class="row">
-    <div class="f"><label for="mcin">Medicaid ID (CIN) <span class="opt">optional</span></label><input type="text" id="mcin" placeholder="Client Identification Number"></div>
-    <div></div>
-  </div>
+  <div class="ff"><label for="mcin">Medicaid ID (CIN)</label><input type="text" id="mcin" placeholder="Client Identification Number"></div>
+  <div class="fhint" style="margin-top:-16px">Optional.</div>
 
   <div class="nav"><div></div><button class="btn btn-p" onclick="go('sB')">Begin attestation →</button></div>
 </div>
@@ -145,10 +143,7 @@
     </div>
   </div>
 
-  <div class="row" style="margin-bottom:0">
-    <div class="f"><label for="sigdate">Date</label><input type="text" id="sigdate" data-mask="date" inputmode="numeric" placeholder="MM/DD/YYYY" maxlength="10"></div>
-    <div></div>
-  </div>
+  <div class="ff"><label for="sigdate">Date</label><input type="text" id="sigdate" data-mask="date" inputmode="numeric" placeholder="MM/DD/YYYY" maxlength="10"></div>
 
   <div class="errmsg" id="errmsg"></div>
 
@@ -181,7 +176,7 @@
 
 <script>
 const $ = id => document.getElementById(id);
-const visitId = new URLSearchParams(location.search).get('id');
+const token = new URLSearchParams(location.search).get('t');
 let record = null, selProvider = '', hasSig = false;
 
 function show(id){['loadmsg','sA','sB','sC','sok','sbad'].forEach(s=>{const el=$(s);el.classList.remove('on');el.style.display=s==='loadmsg'?'none':''});$(id).classList.add('on');if(id==='loadmsg')$(id).style.display=''}
@@ -193,9 +188,9 @@ function esc(s){const d=document.createElement('div');d.textContent=s==null?'':S
 
 // ── INIT ────────────────────────────────────────────────────────
 (async function init(){
-  if(!visitId) return show('sbad');
+  if(!token) return show('sbad');
   try{
-    const res=await fetch('/api/yvy/record?id='+encodeURIComponent(visitId));
+    const res=await fetch('/api/yvy/record?role=visit&t='+encodeURIComponent(token));
     if(!res.ok) return show('sbad');
     record=await res.json();
   }catch{ return show('sbad') }
@@ -287,7 +282,7 @@ async function doSubmit(){
   const btn=$('subbtn');btn.disabled=true;btn.textContent='Submitting…';
   try{
     const res=await fetch('/api/yvy/complete',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({id:visitId,cin:$('mcin').value.trim(),criteria:checked,provider:selProvider,date,signature})});
+      body:JSON.stringify({t:token,cin:$('mcin').value.trim(),criteria:checked,provider:selProvider,date,signature})});
     const data=await res.json().catch(()=>({error:'Invalid server response'}));
     if(!res.ok||data.error)throw new Error(data.error||'Submission failed');
 

@@ -20,28 +20,46 @@ Vercel deployment.
    attestation header (list lives in `yvy/config.js`). Optionally enters the
    patient's email — if provided, the personal link is emailed automatically;
    either way the link is shown for copy/paste.
-2. **Patient form — `/yvy/patient?id=<uuid>`**
-   Name + DOB are pre-filled and locked. Patient adds home address, insurance
+2. **Patient form — `/yvy/patient?t=<patientToken>`**
+   Name + DOB are shown for confirmation. Patient adds home address, insurance
    carrier + member ID, uploads front/back photos of the insurance card
    (compressed client-side), selects their relationship to the patient, and
    picks a visit slot. Slots are Mon–Fri and auto-gated by language:
    English 9:30 AM–5:00 PM, Spanish 9:30 AM–8:00 PM (30-minute slots).
    Spanish visits render the whole form in Spanish.
-3. **Office notification** — on patient submit, the office gets an email
-   (`OFFICE_EMAIL`) and a Teams card (`TEAMS_WEBHOOK_URL`) with a link to the
+3. **Office notification** — on patient submit, the office gets a branded email
+   (`OFFICE_EMAIL`) and a Teams card (`TEAMS_WEBHOOK_URL`) with a button to the
    clinician visit form.
-4. **Clinician visit — `/yvy/visit?id=<uuid>`**
+4. **Clinician visit — `/yvy/visit?t=<visitToken>`**
    Shows the patient's info + card photos, then the standard criteria /
    provider / signature flow. The PDF is generated serverlessly with the
    chosen lead entity in the header on all pages.
 5. **Completion** — the signed PDF is stored and Yeled V'Yalda (`YVY_EMAIL`)
-   receives an email linking to `/yvy/docs?id=<uuid>` (PDF + card images).
+   receives an email linking to `/yvy/docs?t=<docsToken>` (PDF + card images).
+
+### Links & access control
+
+Each visit issues **three independent, unguessable role tokens** — never the
+same value, and one cannot be derived from another:
+
+| Role | Link | Delivered via |
+| --- | --- | --- |
+| Patient | `/yvy/patient?t=<patientToken>` | intake screen / patient invite email |
+| Clinician | `/yvy/visit?t=<visitToken>` | office email + Teams card **only** |
+| Yeled V'Yalda | `/yvy/docs?t=<docsToken>` | completion email **only** |
+
+`/api/yvy/record` requires a `role` and only returns a record when the token
+was issued for that exact role, so a patient link **cannot** be edited into the
+clinician link. The `complete` endpoint (which generates the signed PDF) accepts
+only the visit token — a patient can never self-attest. Tokens and the internal
+record id are never serialized to the browser.
 
 ### Storage
 
-Visit records, card photos, and completed PDFs are stored in Vercel Blob.
-The unguessable UUID in each link is the access token. Records:
-`yvy/records/<id>.json`, statuses: `sent → scheduled → completed`.
+Records, card photos, and completed PDFs are stored in Vercel Blob.
+Records live at `yvy/records/<internalId>.json` (statuses
+`sent → scheduled → completed`); each token maps to its record + role via a
+tiny index blob at `yvy/tok/<token>.json`.
 
 ### Environment variables (Vercel project)
 
