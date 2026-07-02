@@ -65,7 +65,7 @@ export default async function handler(req, res) {
     if (process.env.YVY_EMAIL) {
       await sendMail({
         to: process.env.YVY_EMAIL,
-        subject: `Provider Attestation Completed — ${memberName}`,
+        subject: `Provider Attestation Completed: ${memberName}`,
         text:
 `The provider attestation for ${memberName} (DOB ${fmtDate(record.dob)}) has been completed.
 

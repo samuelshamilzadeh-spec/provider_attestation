@@ -120,6 +120,7 @@ const T = {
     schedNote:'Visits are by phone, Monday through Friday, between {open} and {close}.',
     visitDate:'Visit date', visitTime:'Visit time',
     submit:'Submit', submitting:'Submitting…',
+    pleaseEnter:'Please enter', pleaseChoose:'Please choose',
     phStreet:'123 Main St', phCity:'Brooklyn', phState:'NY', phZip:'11204',
     phCarrier:'e.g. Fidelis Care', phMember:'Member ID', phName:'Full name',
     okTitle:'Thank you!',
@@ -147,6 +148,7 @@ const T = {
     schedNote:'Las visitas son por teléfono, de lunes a viernes, entre {open} y {close}.',
     visitDate:'Fecha de la visita', visitTime:'Hora de la visita',
     submit:'Enviar', submitting:'Enviando…',
+    pleaseEnter:'Por favor ingrese', pleaseChoose:'Por favor seleccione',
     phStreet:'123 Calle Principal', phCity:'Brooklyn', phState:'NY', phZip:'11204',
     phCarrier:'p. ej. Fidelis Care', phMember:'Número de miembro', phName:'Nombre completo',
     okTitle:'¡Gracias!',
@@ -174,13 +176,20 @@ function esc(s){const d=document.createElement('div');d.textContent=s==null?'':S
 function show(id){['loadmsg','sform','sok','sbad'].forEach(s=>{const el=$(s);el.classList.remove('on');el.style.display=s==='loadmsg'?'none':''});$(id).classList.add('on');if(id==='loadmsg')$(id).style.display=''}
 function showErr(m){const e=$('errmsg');e.textContent=m;e.style.display='block';e.scrollIntoView({behavior:'smooth',block:'center'})}
 function clearErr(){$('errmsg').style.display='none'}
-function mark(id,bad){
-  const el=$(id), ff=el.closest('.ff')||el;
-  ff.classList.toggle('err',bad);
-  const clear=()=>ff.classList.remove('err');
-  el.addEventListener('input',clear,{once:true});
-  el.addEventListener('change',clear,{once:true});
+// Inline per-field errors: turn the field red and show a helper under it
+function fieldLabel(id){const ff=$(id).closest('.ff');const l=ff&&ff.querySelector('label');return l?l.textContent.trim():''}
+function setErr(id,msg){
+  const el=$(id), ff=el.closest('.ff'); if(!ff)return;
+  ff.classList.add('err');
+  let e=ff.querySelector('.ferr'); if(!e){e=document.createElement('div');e.className='ferr';ff.appendChild(e)}
+  e.textContent=msg;
+  const clr=()=>ff.classList.remove('err');
+  el.addEventListener('input',clr,{once:true});
+  el.addEventListener('change',clr,{once:true});
 }
+function reqInput(id){setErr(id, t('pleaseEnter')+' '+fieldLabel(id).toLowerCase())}
+function reqSelect(id){setErr(id, t('pleaseChoose')+' '+fieldLabel(id).toLowerCase())}
+function clearFieldErrs(){document.querySelectorAll('.ff.err').forEach(f=>f.classList.remove('err'))}
 
 // Date mask + validation
 function formatDateMask(d){d=d.replace(/\D/g,'').slice(0,8);let o=d.slice(0,2);if(d.length>=3)o+='/'+d.slice(2,4);if(d.length>=5)o+='/'+d.slice(4,8);return o}
@@ -273,26 +282,31 @@ function isWeekend(iso){const [y,mo,d]=iso.split('-').map(Number);const dow=new 
 function isPast(iso){const [y,mo,d]=iso.split('-').map(Number);const pick=new Date(y,mo-1,d);const today=new Date();today.setHours(0,0,0,0);return pick<today}
 
 async function doSubmit(){
-  clearErr();
+  clearErr(); clearFieldErrs();
   let bad=false;
-  ['addr','city','state','zip','carrier','memberid'].forEach(id=>{if(!$(id).value.trim()){mark(id,true);bad=true}});
-  if($('rel').selectedIndex<=0){mark('rel',true);bad=true}
-  if(!$('vtime').value){mark('vtime',true);bad=true}
+  ['addr','city','state','zip','carrier','memberid'].forEach(id=>{if(!$(id).value.trim()){reqInput(id);bad=true}});
+  if($('rel').selectedIndex<=0){reqSelect('rel');bad=true}
+  if(!$('vtime').value){reqSelect('vtime');bad=true}
 
   const dateMask=$('vdate').value;
-  let dateErr='';
-  if(!isValidDate(dateMask)){mark('vdate',true);bad=true;dateErr=t('errDate')}
+  if(!isValidDate(dateMask)){setErr('vdate',t('errDate'));bad=true}
   else{
     const iso=maskToIso(dateMask);
-    if(isWeekend(iso)){mark('vdate',true);bad=true;dateErr=t('errWeekend')}
-    else if(isPast(iso)){mark('vdate',true);bad=true;dateErr=t('errPast')}
+    if(isWeekend(iso)){setErr('vdate',t('errWeekend'));bad=true}
+    else if(isPast(iso)){setErr('vdate',t('errPast'));bad=true}
   }
 
-  if(bad) return showErr(dateErr || t('errFields'));
+  let photosMissing=false;
   if(!images.front||!images.back){
+    photosMissing=true;
     if(!images.front)$('tile-front').classList.add('err');
     if(!images.back)$('tile-back').classList.add('err');
-    return showErr(t('errPhotos'));
+  }
+
+  if(bad||photosMissing){
+    if(photosMissing) showErr(t('errPhotos'));
+    document.querySelector('.ff.err, .uptile.err')?.scrollIntoView({behavior:'smooth',block:'center'});
+    return;
   }
 
   const btn=$('subbtn');btn.disabled=true;btn.textContent=t('submitting');
@@ -311,7 +325,7 @@ async function doSubmit(){
     if(!res.ok||data.error)throw new Error(data.error||'Submission failed');
 
     const [h,m]=$('vtime').value.split(':').map(Number);
-    const when=`${isoToMask(maskToIso(dateMask))} — ${fmtMins(h*60+m)}`;
+    const when=`${isoToMask(maskToIso(dateMask))} at ${fmtMins(h*60+m)}`;
     $('oktext').textContent=t('okText').replace('{when}',when);
     show('sok');
     window.scrollTo({top:0,behavior:'smooth'});

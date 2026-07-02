@@ -1,7 +1,9 @@
 import crypto from 'crypto';
-import { assertBlobConfigured, saveRecord, saveTokenIndex, siteOrigin } from '../../lib/store.js';
+import { assertBlobConfigured, saveRecord, saveTokenIndex, uploadDataUrl, siteOrigin } from '../../lib/store.js';
 import { sendMail, renderEmail } from '../../lib/notify.js';
 import { validSlot, notifyOffice } from '../../lib/visit.js';
+
+export const config = { api: { bodyParser: { sizeLimit: '4mb' } } };
 
 // Staff intake. Two modes:
 //   'send'  — create the visit and email/hand the patient a link to fill in
@@ -23,7 +25,7 @@ export default async function handler(req, res) {
     mode = 'send', firstName, lastName, dob, language, leadEntity, patientEmail,
     // staff-mode fields
     address, city, state, zip, insuranceCarrier, insuranceMemberId,
-    relationship, fillerName, visitDate, visitTime
+    visitDate, visitTime, cardFront, cardBack
   } = body || {};
 
   if (!firstName?.trim() || !lastName?.trim()) return res.status(400).json({ error: 'Patient first and last name are required' });
@@ -55,7 +57,8 @@ export default async function handler(req, res) {
       docsToken
     };
 
-    // ── STAFF MODE: fill the patient details now, skip card photos ──────────
+    // ── STAFF MODE: staff fills the patient details now. Insurance-card photos
+    //    are OPTIONAL here; relationship is not collected. ────────────────────
     if (mode === 'staff') {
       if (!address?.trim() || !city?.trim() || !state?.trim() || !zip?.trim()) {
         return res.status(400).json({ error: 'Full address is required.' });
@@ -63,9 +66,13 @@ export default async function handler(req, res) {
       if (!insuranceCarrier?.trim() || !insuranceMemberId?.trim()) {
         return res.status(400).json({ error: 'Insurance carrier and member ID are required.' });
       }
-      if (!relationship?.trim()) return res.status(400).json({ error: 'Relationship to patient is required.' });
       const slotErr = validSlot(language, visitDate, visitTime);
       if (slotErr) return res.status(400).json({ error: slotErr });
+
+      // Optional card photos — upload only what was provided.
+      let cardFrontUrl = '', cardBackUrl = '';
+      if (cardFront) cardFrontUrl = await uploadDataUrl(`yvy/cards/${id}-front.jpg`, cardFront);
+      if (cardBack)  cardBackUrl  = await uploadDataUrl(`yvy/cards/${id}-back.jpg`, cardBack);
 
       record.status = 'scheduled';
       record.submission = {
@@ -77,12 +84,12 @@ export default async function handler(req, res) {
         zip: zip.trim(),
         insuranceCarrier: insuranceCarrier.trim(),
         insuranceMemberId: insuranceMemberId.trim(),
-        relationship: relationship.trim(),
-        fillerName: (fillerName || '').trim(),
+        relationship: '',
+        fillerName: '',
         visitDate,
         visitTime,
-        cardFrontUrl: '',
-        cardBackUrl: ''
+        cardFrontUrl,
+        cardBackUrl
       };
     }
 

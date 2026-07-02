@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Attestation Visit — Clinician</title>
+<title>Attestation Visit</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/style.css">
@@ -204,18 +204,18 @@ const fileUrl = which => `/api/yvy/file?role=visit&which=${which}&t=${encodeURIC
     ['DOB', isoToMask(record.dob)],
     ['Language', record.language==='es'?'Spanish':'English'],
     ['Lead Entity', record.leadEntity],
-    ['Visit', s.visitDate?isoToMask(s.visitDate)+' at '+fmtTime(s.visitTime):'—'],
-    ['Address', s.address?`${s.address}, ${s.city}, ${s.state} ${s.zip}`:'—'],
-    ['Insurance', s.insuranceCarrier?`${s.insuranceCarrier} — ${s.insuranceMemberId}`:'—'],
-    ['Filled out by', s.relationship?(s.relationship+(s.fillerName?` (${s.fillerName})`:'')):'—']
+    ['Visit', s.visitDate?isoToMask(s.visitDate)+' at '+fmtTime(s.visitTime):'Not provided'],
+    ['Address', s.address?`${s.address}, ${s.city}, ${s.state} ${s.zip}`:'Not provided'],
+    ['Insurance', s.insuranceCarrier?`${s.insuranceCarrier}, ${s.insuranceMemberId}`:'Not provided'],
+    ['Filled out by', s.relationship?(s.relationship+(s.fillerName?` (${s.fillerName})`:'')):(s.source==='staff'?'Yeled V\'Yalda staff':'Not provided')]
   ];
   $('summary').innerHTML = rows.map(([k,v])=>`<div class="irow"><span class="ik">${esc(k)}</span><span class="iv">${esc(v)}</span></div>`).join('');
 
   if(s.cardFront){
     const f=fileUrl('cardFront'), b=fileUrl('cardBack');
     $('cardimgs').innerHTML =
-      `<a href="${f}" target="_blank" rel="noopener"><img src="${f}" alt="Card front"><div class="clbl">Front — tap to enlarge</div></a>`+
-      `<a href="${b}" target="_blank" rel="noopener"><img src="${b}" alt="Card back"><div class="clbl">Back — tap to enlarge</div></a>`;
+      `<a href="${f}" target="_blank" rel="noopener"><img src="${f}" alt="Card front"><div class="clbl">Front (tap to enlarge)</div></a>`+
+      `<a href="${b}" target="_blank" rel="noopener"><img src="${b}" alt="Card back"><div class="clbl">Back (tap to enlarge)</div></a>`;
   } else {
     $('cardimgs').innerHTML='<div class="note" style="grid-column:1/-1;margin:0">No card photos on file'+(s.source==='staff'?' (scheduled by YVY staff).':' yet.')+'</div>';
   }
@@ -224,7 +224,7 @@ const fileUrl = which => `/api/yvy/file?role=visit&which=${which}&t=${encodeURIC
     $('warnbox').innerHTML='<div class="warn">The patient has not submitted their information yet.</div>';
   } else if(record.status==='completed'){
     const link=record.completion&&record.completion.pdf ? fileUrl('pdf') : null;
-    $('warnbox').innerHTML='<div class="warn">This attestation was already completed'+(link?` — <a href="${link}" target="_blank" rel="noopener">view the signed PDF</a>. `:'. ')+'Submitting again will replace it.</div>';
+    $('warnbox').innerHTML='<div class="warn">This attestation was already completed.'+(link?` <a href="${link}" target="_blank" rel="noopener">View the signed PDF.</a>`:'')+' Submitting again will replace it.</div>';
   }
 
   show('sA');

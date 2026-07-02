@@ -66,10 +66,10 @@ function esc(s){const d=document.createElement('div');d.textContent=s==null?'':S
     ['Patient', record.firstName+' '+record.lastName],
     ['DOB', isoToMask(record.dob)],
     ['Lead Entity', record.leadEntity],
-    ['Visit', s.visitDate?isoToMask(s.visitDate)+' at '+fmtTime(s.visitTime):'—'],
-    ['Insurance', s.insuranceCarrier?`${s.insuranceCarrier} — ${s.insuranceMemberId}`:'—'],
-    ['Provider', c.provider||'—'],
-    ['Completed', c.completedAt?new Date(c.completedAt).toLocaleString():'—']
+    ['Visit', s.visitDate?isoToMask(s.visitDate)+' at '+fmtTime(s.visitTime):'Not provided'],
+    ['Insurance', s.insuranceCarrier?`${s.insuranceCarrier}, ${s.insuranceMemberId}`:'Not provided'],
+    ['Provider', c.provider||'Not provided'],
+    ['Completed', c.completedAt?new Date(c.completedAt).toLocaleString():'Not provided']
   ];
   $('summary').innerHTML = rows.map(([k,v])=>`<div class="irow"><span class="ik">${esc(k)}</span><span class="iv">${esc(v)}</span></div>`).join('');
 
