@@ -218,9 +218,10 @@ const fileUrl = which => `/api/yvy/file?role=visit&which=${which}&t=${encodeURIC
     $('cardsection').style.display='none';
   }
 
-  if(record.status==='sent'){
-    $('warnbox').innerHTML='<div class="warn">The patient has not submitted their information yet.</div>';
-  } else if(record.status==='completed'){
+  // The office only receives the visit link after the patient submits (or when
+  // staff schedule directly), so the "not submitted yet" state isn't reachable
+  // here in normal use. Only surface the already-completed notice.
+  if(record.status==='completed'){
     const link=record.completion&&record.completion.pdf ? fileUrl('pdf') : null;
     $('warnbox').innerHTML='<div class="warn">This attestation was already completed.'+(link?` <a href="${link}" target="_blank" rel="noopener">View the signed PDF.</a>`:'')+' Submitting again will replace it.</div>';
   }
