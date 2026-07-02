@@ -111,18 +111,20 @@ export default async function handler(req, res) {
 
     let emailSent = false;
     if (record.patientEmail) {
+      // No name or other sensitive detail in the patient invite — just a clean,
+      // branded prompt with a link to fill out the form.
       const copy = language === 'es'
         ? {
-            subject: 'Por favor complete su formulario de visita',
-            heading: `Hola ${record.firstName},`,
-            intro: 'Por favor complete su información y elija un horario de visita usando su enlace personal a continuación.',
+            subject: 'Programe su visita de telesalud',
+            heading: 'Programe su visita de telesalud',
+            intro: 'Le pedimos que complete un formulario breve y elija un horario para su visita de telesalud. Toque el botón de abajo para comenzar; solo toma unos minutos.',
             button: 'Completar mi formulario',
             footer: 'Si no esperaba este correo, puede ignorarlo.'
           }
         : {
-            subject: 'Please complete your visit form',
-            heading: `Hello ${record.firstName},`,
-            intro: 'Please complete your information and choose a visit time using your personal link below.',
+            subject: 'Schedule your telehealth visit',
+            heading: 'Schedule your telehealth visit',
+            intro: 'You have been asked to complete a short form and choose a time for your telehealth visit. Tap the button below to get started. It only takes a few minutes.',
             button: 'Complete my form',
             footer: 'If you were not expecting this email, you can ignore it.'
           };
