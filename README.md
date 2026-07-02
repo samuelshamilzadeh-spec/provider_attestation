@@ -14,13 +14,21 @@ Vercel deployment.
 
 ## Flow 2 — Yeled V'Yalda (parent company)
 
-1. **Staff intake — `/yvy/intake`**
-   YVY staff enters patient first/last name, DOB, visit language
-   (English/Spanish), and picks the **SCN Lead Entity** printed on the
-   attestation header (list lives in `yvy/config.js`). Optionally enters the
-   patient's email — if provided, the personal link is emailed automatically;
-   either way the link is shown for copy/paste.
-2. **Patient form — `/yvy/patient?t=<patientToken>`**
+1. **Staff intake — `/yvy/intake`** — two modes:
+   - **Send link to patient** — YVY staff enters patient first/last name, DOB,
+     visit language (English/Spanish), and the **SCN Lead Entity** printed on
+     the attestation header (list in `yvy/config.js`), plus an optional patient
+     email. The patient gets a personal link (emailed if an address was given,
+     always shown for copy/paste) and fills in their own details (stage 2).
+   - **Schedule for patient** — for when YVY staff schedules on the patient's
+     behalf. Staff fills the same patient details themselves — address,
+     insurance carrier + member ID, relationship, and the visit slot (same
+     language-gated Mon–Fri windows) — **minus the insurance-card photos (the
+     HIPAA-release step, not collected in this mode)**. The visit skips stage 2
+     entirely, goes straight to `scheduled`, and the Premier office is notified
+     immediately (same email + Teams card as a patient submission, flagged
+     "Entered by YVY staff").
+2. **Patient form — `/yvy/patient?t=<patientToken>`** (send-link mode only)
    Name + DOB are shown for confirmation. Patient adds home address, insurance
    carrier + member ID, uploads front/back photos of the insurance card
    (compressed client-side), selects their relationship to the patient, and

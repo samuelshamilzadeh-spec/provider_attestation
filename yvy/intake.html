@@ -20,6 +20,16 @@
 <div class="step on card" id="sform">
   <div class="slbl">New provider attestation visit</div>
 
+  <!-- Mode: send the patient a link, or fill their details in now -->
+  <div style="margin-bottom:6px">
+    <div class="seg" id="modeseg">
+      <div class="sopt sel" data-mode="send" onclick="selMode(this)">Send link to patient</div>
+      <div class="sopt" data-mode="staff" onclick="selMode(this)">Schedule for patient</div>
+    </div>
+  </div>
+  <div class="fhint" style="margin-bottom:1.5rem" id="modehint">The patient gets a personal link to enter their own details and pick a time.</div>
+
+  <!-- Always-on basics -->
   <div class="ffrow">
     <div class="ff"><label for="fn">Patient first name <span class="req">*</span></label><input type="text" id="fn" placeholder="First name" autocomplete="off"></div>
     <div class="ff"><label for="ln">Patient last name <span class="req">*</span></label><input type="text" id="ln" placeholder="Last name" autocomplete="off"></div>
@@ -41,8 +51,47 @@
   </div>
   <div class="fhint" style="margin-top:-16px;margin-bottom:22px">Printed on the header of every page of the attestation.</div>
 
-  <div class="ff"><label for="pemail">Patient email</label><input type="email" id="pemail" placeholder="patient@example.com" autocomplete="off"></div>
-  <div class="fhint" style="margin-top:-16px">Optional — if provided, the personal link is emailed to the patient automatically.</div>
+  <!-- SEND MODE: patient email -->
+  <div id="sendFields">
+    <div class="ff"><label for="pemail">Patient email</label><input type="email" id="pemail" placeholder="patient@example.com" autocomplete="off"></div>
+    <div class="fhint" style="margin-top:-16px">Optional — if provided, the personal link is emailed to the patient automatically.</div>
+  </div>
+
+  <!-- STAFF MODE: enter the patient's details now (no insurance-card photos) -->
+  <div id="staffFields" style="display:none">
+    <div class="slbl" style="margin-top:.5rem">Patient's address</div>
+    <div class="ff"><label for="addr">Street address <span class="req">*</span></label><input type="text" id="addr" placeholder="123 Main St" autocomplete="off"></div>
+    <div class="ff"><label for="city">City <span class="req">*</span></label><input type="text" id="city" placeholder="Brooklyn" autocomplete="off"></div>
+    <div class="ffrow narrow-right">
+      <div class="ff"><label for="state">State <span class="req">*</span></label><input type="text" id="state" value="NY" maxlength="2" placeholder="NY" autocomplete="off"></div>
+      <div class="ff"><label for="zip">ZIP code <span class="req">*</span></label><input type="text" id="zip" inputmode="numeric" maxlength="10" placeholder="11204" autocomplete="off"></div>
+    </div>
+
+    <div class="slbl" style="margin-top:1.5rem">Insurance</div>
+    <div class="ff"><label for="carrier">Insurance carrier <span class="req">*</span></label><input type="text" id="carrier" placeholder="e.g. Fidelis Care"></div>
+    <div class="ff"><label for="memberid">Insurance member ID <span class="req">*</span></label><input type="text" id="memberid" placeholder="Member ID"></div>
+    <div class="note">Insurance card photos are not collected when scheduling on the patient's behalf.</div>
+
+    <div class="slbl" style="margin-top:1.5rem">Person present at the visit</div>
+    <div class="ff">
+      <label for="rel">Relationship to patient <span class="req">*</span></label>
+      <select id="rel"><option value="" selected disabled hidden></option></select>
+    </div>
+    <div class="ff" id="fillerwrap" style="display:none">
+      <label for="filler">Their full name</label>
+      <input type="text" id="filler" placeholder="Full name">
+    </div>
+
+    <div class="slbl" style="margin-top:1.5rem">Schedule the visit</div>
+    <div class="note" id="schednote"></div>
+    <div class="ffrow">
+      <div class="ff"><label for="vdate">Visit date <span class="req">*</span></label><input type="text" id="vdate" data-mask="date" inputmode="numeric" placeholder="MM/DD/YYYY" maxlength="10"></div>
+      <div class="ff">
+        <label for="vtime">Visit time <span class="req">*</span></label>
+        <select id="vtime" required><option value="" selected disabled hidden></option></select>
+      </div>
+    </div>
+  </div>
 
   <div class="errmsg" id="errmsg"></div>
 
@@ -53,10 +102,10 @@
 <div class="step card" id="sok">
   <div class="okwrap" style="padding-bottom:1rem">
     <div class="okicon">✓</div>
-    <h2>Visit created</h2>
+    <h2 id="oktitle">Visit created</h2>
     <p id="okmsg">Share this personal link with the patient to complete their information and pick a visit time.</p>
   </div>
-  <div class="linkbox">
+  <div class="linkbox" id="linkbox">
     <input type="text" id="plink" readonly onclick="this.select()">
     <button class="btn" id="copybtn" onclick="copyLink()">Copy</button>
   </div>
@@ -70,29 +119,64 @@
 <script src="/yvy/config.js"></script>
 <script>
 const $ = id => document.getElementById(id);
-let lang = 'en';
+let lang = 'en', mode = 'send';
+const RELS = ['Self','Parent','Legal guardian','Spouse','Other family member','Other'];
 
 // Populate lead entity dropdown from config.js
 (function(){
   const sel = $('entity');
   (window.YVY_LEAD_ENTITIES || []).forEach(n => {
-    const o = document.createElement('option');
-    o.value = o.textContent = n;
-    sel.appendChild(o);
+    const o = document.createElement('option'); o.value = o.textContent = n; sel.appendChild(o);
   });
+  const rel = $('rel');
+  RELS.forEach(r => { const o=document.createElement('option'); o.value=o.textContent=r; rel.appendChild(o); });
+  rel.addEventListener('change',()=>{ $('fillerwrap').style.display = (rel.value && rel.value!=='Self') ? 'block':'none' });
 })();
+
+function fmtMins(mins){const h=Math.floor(mins/60),m=mins%60;return `${((h+11)%12)+1}:${String(m).padStart(2,'0')} ${h>=12?'PM':'AM'}`}
+
+function populateSlots(){
+  const w = window.YVY_SCHEDULE[lang] || window.YVY_SCHEDULE.en;
+  $('schednote').textContent = `Visits are Monday–Friday, between ${fmtMins(w.open)} and ${fmtMins(w.close)} for ${lang==='es'?'Spanish':'English'} visits.`;
+  const vt=$('vtime');
+  vt.innerHTML='<option value="" selected disabled hidden></option>';
+  for(let m=w.open; m+window.YVY_SCHEDULE.slotMinutes<=w.close; m+=window.YVY_SCHEDULE.slotMinutes){
+    const o=document.createElement('option');
+    o.value=`${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`;
+    o.textContent=fmtMins(m); vt.appendChild(o);
+  }
+}
+populateSlots();
+
+function selMode(el){
+  document.querySelectorAll('#modeseg .sopt').forEach(s=>s.classList.remove('sel'));
+  el.classList.add('sel');
+  mode = el.dataset.mode;
+  const staff = mode==='staff';
+  $('staffFields').style.display = staff ? 'block':'none';
+  $('sendFields').style.display  = staff ? 'none':'block';
+  $('modehint').textContent = staff
+    ? "You enter the patient's details and the visit goes straight to the Premier office. Insurance card photos are not collected."
+    : 'The patient gets a personal link to enter their own details and pick a time.';
+  $('createbtn').textContent = staff ? 'Schedule visit →' : 'Create & send to patient →';
+}
 
 function selLang(el){
   document.querySelectorAll('#langseg .sopt').forEach(s=>s.classList.remove('sel'));
   el.classList.add('sel');
   lang = el.dataset.lang;
+  populateSlots(); // English/Spanish windows differ
 }
 
-// Date mask (MM/DD/YYYY)
+// Date mask (MM/DD/YYYY) on all masked inputs
 function formatDateMask(d){d=d.replace(/\D/g,'').slice(0,8);let o=d.slice(0,2);if(d.length>=3)o+='/'+d.slice(2,4);if(d.length>=5)o+='/'+d.slice(4,8);return o}
-$('dob').addEventListener('input',e=>{const el=e.target;const del=e.inputType&&e.inputType.startsWith('delete');const f=formatDateMask(el.value);el.value=f;if(!del)el.setSelectionRange(f.length,f.length)});
+document.querySelectorAll('input[data-mask="date"]').forEach(el=>{
+  el.addEventListener('input',e=>{const del=e.inputType&&e.inputType.startsWith('delete');const f=formatDateMask(el.value);el.value=f;if(!del)el.setSelectionRange(f.length,f.length)});
+});
 function isValidDate(s){const m=/^(\d{2})\/(\d{2})\/(\d{4})$/.exec(s);if(!m)return false;const d=new Date(+m[3],+m[1]-1,+m[2]);return d.getFullYear()===+m[3]&&d.getMonth()===+m[1]-1&&d.getDate()===+m[2]}
 function maskToIso(s){const m=/^(\d{2})\/(\d{2})\/(\d{4})$/.exec(s);return m?`${m[3]}-${m[1]}-${m[2]}`:''}
+function isWeekend(iso){const [y,mo,d]=iso.split('-').map(Number);const dow=new Date(y,mo-1,d).getDay();return dow===0||dow===6}
+function isPast(iso){const [y,mo,d]=iso.split('-').map(Number);const pick=new Date(y,mo-1,d);const today=new Date();today.setHours(0,0,0,0);return pick<today}
 
 function mark(id,bad){
   const el=$(id), ff=el.closest('.ff')||el;
@@ -101,41 +185,73 @@ function mark(id,bad){
   el.addEventListener('input',clear,{once:true});
   el.addEventListener('change',clear,{once:true});
 }
-function showErr(m){const e=$('errmsg');e.textContent=m;e.style.display='block'}
+function showErr(m){const e=$('errmsg');e.textContent=m;e.style.display='block';e.scrollIntoView({behavior:'smooth',block:'center'})}
 function clearErr(){$('errmsg').style.display='none'}
 
 async function createVisit(){
   clearErr();
-  const fn=$('fn').value.trim(), ln=$('ln').value.trim(), dobMask=$('dob').value;
-  const entity=$('entity').value, pemail=$('pemail').value.trim();
-  let bad=false;
+  const fn=$('fn').value.trim(), ln=$('ln').value.trim(), dobMask=$('dob').value, entity=$('entity').value;
+  let bad=false, msg='';
   if(!fn){mark('fn',true);bad=true}
   if(!ln){mark('ln',true);bad=true}
   if(!isValidDate(dobMask)){mark('dob',true);bad=true}
   if(!entity){mark('entity',true);bad=true}
-  if(bad)return showErr('Please complete the highlighted fields.');
-  if(pemail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(pemail)){mark('pemail',true);return showErr('Please enter a valid email address.')}
 
-  const btn=$('createbtn');btn.disabled=true;btn.textContent='Creating…';
+  const payload = {mode, firstName:fn, lastName:ln, dob:maskToIso(dobMask), language:lang, leadEntity:entity};
+
+  if(mode==='send'){
+    const pemail=$('pemail').value.trim();
+    if(pemail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(pemail)){mark('pemail',true);bad=true;msg='Please enter a valid email address.'}
+    payload.patientEmail=pemail;
+  } else {
+    ['addr','city','state','zip','carrier','memberid'].forEach(id=>{if(!$(id).value.trim()){mark(id,true);bad=true}});
+    if($('rel').selectedIndex<=0){mark('rel',true);bad=true}
+    if(!$('vtime').value){mark('vtime',true);bad=true}
+    const vdateMask=$('vdate').value;
+    if(!isValidDate(vdateMask)){mark('vdate',true);bad=true;msg='Please enter a valid visit date (MM/DD/YYYY).'}
+    else{
+      const iso=maskToIso(vdateMask);
+      if(isWeekend(iso)){mark('vdate',true);bad=true;msg='Please choose a weekday (Monday to Friday).'}
+      else if(isPast(iso)){mark('vdate',true);bad=true;msg='Please choose a visit date in the future.'}
+    }
+    Object.assign(payload,{
+      address:$('addr').value.trim(), city:$('city').value.trim(), state:$('state').value.trim(), zip:$('zip').value.trim(),
+      insuranceCarrier:$('carrier').value.trim(), insuranceMemberId:$('memberid').value.trim(),
+      relationship:$('rel').value, fillerName:$('filler').value.trim(),
+      visitDate:maskToIso(vdateMask), visitTime:$('vtime').value
+    });
+  }
+
+  if(bad) return showErr(msg || 'Please complete the highlighted fields.');
+
+  const btn=$('createbtn');btn.disabled=true;btn.textContent = mode==='staff'?'Scheduling…':'Creating…';
   try{
-    const res=await fetch('/api/yvy/create',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({firstName:fn,lastName:ln,dob:maskToIso(dobMask),language:lang,leadEntity:entity,patientEmail:pemail})});
+    const res=await fetch('/api/yvy/create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     const data=await res.json().catch(()=>({error:'Invalid server response'}));
     if(!res.ok||data.error)throw new Error(data.error||'Request failed');
 
-    $('plink').value=data.patientLink;
-    $('okmsg').textContent = data.emailSent
-      ? 'The link was emailed to the patient. You can also copy it below to share it another way.'
-      : (data.emailError
-          ? 'The visit was created, but the email could not be sent ('+data.emailError+'). Please share the link below with the patient.'
-          : 'Share this personal link with the patient to complete their information and pick a visit time.');
+    if(data.scheduled){
+      // staff mode — went straight to the office
+      $('oktitle').textContent='Visit scheduled';
+      $('okmsg').textContent='The Premier office has been notified. The clinician will complete the attestation at the time of the visit.';
+      $('linkbox').style.display='none';
+    } else {
+      $('oktitle').textContent='Visit created';
+      $('plink').value=data.patientLink;
+      $('linkbox').style.display='flex';
+      $('okmsg').textContent = data.emailSent
+        ? 'The link was emailed to the patient. You can also copy it below to share it another way.'
+        : (data.emailError
+            ? 'The visit was created, but the email could not be sent ('+data.emailError+'). Please share the link below with the patient.'
+            : 'Share this personal link with the patient to complete their information and pick a visit time.');
+    }
     $('sform').classList.remove('on');
     $('sok').classList.add('on');
     window.scrollTo({top:0,behavior:'smooth'});
   }catch(err){
-    showErr('Could not create visit: '+err.message);
+    showErr((mode==='staff'?'Could not schedule visit: ':'Could not create visit: ')+err.message);
   }finally{
-    btn.disabled=false;btn.textContent='Create & send to patient →';
+    btn.disabled=false;btn.textContent = mode==='staff'?'Schedule visit →':'Create & send to patient →';
   }
 }
 
@@ -148,8 +264,10 @@ function copyLink(){
 }
 
 function another(){
-  ['fn','ln','dob','pemail'].forEach(id=>$(id).value='');
-  $('entity').selectedIndex=0;
+  ['fn','ln','dob','pemail','addr','city','zip','carrier','memberid','filler','vdate'].forEach(id=>{const el=$(id);if(el)el.value=''});
+  $('state').value='NY';
+  $('entity').selectedIndex=0; $('rel').selectedIndex=0; $('vtime').selectedIndex=0;
+  $('fillerwrap').style.display='none';
   $('sok').classList.remove('on');
   $('sform').classList.add('on');
 }

@@ -1,9 +1,14 @@
 import crypto from 'crypto';
 import { assertBlobConfigured, saveRecord, saveTokenIndex, siteOrigin } from '../../lib/store.js';
 import { sendMail, renderEmail } from '../../lib/notify.js';
+import { validSlot, notifyOffice } from '../../lib/visit.js';
 
-// Staff intake: creates a visit record with three independent role tokens and
-// (optionally) emails the patient their personalized link.
+// Staff intake. Two modes:
+//   'send'  — create the visit and email/hand the patient a link to fill in
+//             their own details (address, insurance, card photos, schedule).
+//   'staff' — YVY staff fills the patient details themselves (minus the
+//             insurance-card photos / HIPAA release) and the visit goes
+//             straight to the Premier office as a scheduled visit.
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
@@ -14,12 +19,18 @@ export default async function handler(req, res) {
   if (typeof body === 'string') {
     try { body = JSON.parse(body); } catch { return res.status(400).json({ error: 'Invalid JSON body' }); }
   }
-  const { firstName, lastName, dob, language, leadEntity, patientEmail } = body || {};
+  const {
+    mode = 'send', firstName, lastName, dob, language, leadEntity, patientEmail,
+    // staff-mode fields
+    address, city, state, zip, insuranceCarrier, insuranceMemberId,
+    relationship, fillerName, visitDate, visitTime
+  } = body || {};
 
   if (!firstName?.trim() || !lastName?.trim()) return res.status(400).json({ error: 'Patient first and last name are required' });
   if (!/^\d{4}-\d{2}-\d{2}$/.test(dob || ''))  return res.status(400).json({ error: 'Valid date of birth is required' });
   if (!['en', 'es'].includes(language))        return res.status(400).json({ error: 'Visit language must be English or Spanish' });
   if (!leadEntity?.trim())                     return res.status(400).json({ error: 'SCN Lead Entity is required' });
+  if (!['send', 'staff'].includes(mode))       return res.status(400).json({ error: 'Invalid mode' });
 
   try {
     assertBlobConfigured();
@@ -43,6 +54,38 @@ export default async function handler(req, res) {
       visitToken,
       docsToken
     };
+
+    // ── STAFF MODE: fill the patient details now, skip card photos ──────────
+    if (mode === 'staff') {
+      if (!address?.trim() || !city?.trim() || !state?.trim() || !zip?.trim()) {
+        return res.status(400).json({ error: 'Full address is required.' });
+      }
+      if (!insuranceCarrier?.trim() || !insuranceMemberId?.trim()) {
+        return res.status(400).json({ error: 'Insurance carrier and member ID are required.' });
+      }
+      if (!relationship?.trim()) return res.status(400).json({ error: 'Relationship to patient is required.' });
+      const slotErr = validSlot(language, visitDate, visitTime);
+      if (slotErr) return res.status(400).json({ error: slotErr });
+
+      record.status = 'scheduled';
+      record.submission = {
+        submittedAt: new Date().toISOString(),
+        source: 'staff',
+        address: address.trim(),
+        city: city.trim(),
+        state: state.trim(),
+        zip: zip.trim(),
+        insuranceCarrier: insuranceCarrier.trim(),
+        insuranceMemberId: insuranceMemberId.trim(),
+        relationship: relationship.trim(),
+        fillerName: (fillerName || '').trim(),
+        visitDate,
+        visitTime,
+        cardFrontUrl: '',
+        cardBackUrl: ''
+      };
+    }
+
     await saveRecord(record);
     await Promise.all([
       saveTokenIndex(patientToken, id, 'patient'),
@@ -50,6 +93,13 @@ export default async function handler(req, res) {
       saveTokenIndex(docsToken, id, 'docs')
     ]);
 
+    if (mode === 'staff') {
+      const visitLink = `${siteOrigin(req)}/yvy/visit?t=${visitToken}`;
+      await notifyOffice({ record, visitLink });
+      return res.status(200).json({ scheduled: true });
+    }
+
+    // ── SEND MODE: hand/email the patient their link ────────────────────────
     const patientLink = `${siteOrigin(req)}/yvy/patient?t=${patientToken}`;
 
     let emailSent = false;
@@ -78,7 +128,6 @@ export default async function handler(req, res) {
         });
         emailSent = true;
       } catch (err) {
-        // Surface the failure but still return the link so staff can send it manually.
         return res.status(200).json({ patientLink, emailSent: false, emailError: err.message });
       }
     }
