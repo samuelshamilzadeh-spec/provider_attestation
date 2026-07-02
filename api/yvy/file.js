@@ -1,4 +1,4 @@
-import { loadRecordByToken } from '../../lib/store.js';
+import { loadRecordByToken, downloadBlob } from '../../lib/store.js';
 
 // Streams a stored card photo or completed PDF through the app, gated by the
 // same role token as everything else. The underlying blob URL is never sent to
@@ -29,18 +29,17 @@ export default async function handler(req, res) {
               : c.pdfUrl;
     if (!url) return res.status(404).json({ error: 'Not found' });
 
-    const upstream = await fetch(url, { cache: 'no-store' });
-    if (!upstream.ok) return res.status(502).json({ error: 'Upstream error' });
-    const buf = Buffer.from(await upstream.arrayBuffer());
+    const file = await downloadBlob(url);
+    if (!file) return res.status(502).json({ error: 'Upstream error' });
 
-    res.setHeader('Content-Type', WHICH[which]);
+    res.setHeader('Content-Type', file.contentType || WHICH[which]);
     res.setHeader('Cache-Control', 'private, no-store');
     if (which === 'pdf') {
       const name = `${record.firstName}_${record.lastName}`.replace(/[^A-Za-z0-9_-]+/g, '_') || 'attestation';
       res.setHeader('Content-Disposition', `inline; filename="${name}.pdf"`);
     }
     res.statusCode = 200;
-    return res.end(buf);
+    return res.end(file.buf);
   } catch (err) {
     return res.status(500).json({ error: err.message || 'Internal error' });
   }
