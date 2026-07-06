@@ -60,7 +60,7 @@ export default async function handler(req, res) {
       pdfUrl
     };
     await saveRecord(record);
-    await syncVisitRow(record);
+    await syncVisitRow(record, siteOrigin(req));
 
     // Docs link carries the DOCS token and is only ever sent to Yeled V'Yalda.
     const docsLink = `${siteOrigin(req)}/yvy/docs?t=${record.docsToken}`;

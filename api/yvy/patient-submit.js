@@ -71,7 +71,7 @@ export default async function handler(req, res) {
     const visitLink = `${siteOrigin(req)}/yvy/visit?t=${record.visitToken}`;
     await Promise.all([
       notifyOffice({ record, visitLink }),
-      syncVisitRow(record)
+      syncVisitRow(record, siteOrigin(req))
     ]);
 
     return res.status(200).json({ success: true });

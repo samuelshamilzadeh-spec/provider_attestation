@@ -107,13 +107,17 @@ export default async function handler(req, res) {
       const visitLink = `${siteOrigin(req)}/yvy/visit?t=${visitToken}`;
       await Promise.all([
         notifyOffice({ record, visitLink }),
-        syncVisitRow(record)
+        syncVisitRow(record, siteOrigin(req))
       ]);
       return res.status(200).json({ scheduled: true });
     }
 
     // ── SEND MODE: hand/email the patient their link ────────────────────────
     const patientLink = `${siteOrigin(req)}/yvy/patient?t=${patientToken}`;
+
+    // Sync now (status 'sent') so the visit shows up in the sheet immediately,
+    // not just once the patient later submits it.
+    await syncVisitRow(record, siteOrigin(req));
 
     let emailSent = false;
     if (record.patientEmail) {

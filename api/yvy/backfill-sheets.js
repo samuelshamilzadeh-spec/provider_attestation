@@ -1,4 +1,4 @@
-import { assertBlobConfigured, listRecords } from '../../lib/store.js';
+import { assertBlobConfigured, listRecords, siteOrigin } from '../../lib/store.js';
 import { syncVisitRow } from '../../lib/sheets.js';
 
 // One-off maintenance tool: pushes every existing visit record into the
@@ -27,9 +27,10 @@ export default async function handler(req, res) {
   try {
     assertBlobConfigured();
     const records = await listRecords();
+    const origin = siteOrigin(req);
     const results = [];
     for (const record of records) {
-      const ok = await syncVisitRow(record);
+      const ok = await syncVisitRow(record, origin);
       results.push({ id: record.id, status: record.status, synced: ok });
     }
     const synced = results.filter(r => r.synced).length;
