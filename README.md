@@ -44,6 +44,11 @@ Vercel deployment.
    chosen lead entity in the header on all pages.
 5. **Completion** — the signed PDF is stored and Yeled V'Yalda (`YVY_EMAIL`)
    receives an email linking to `/yvy/docs?t=<docsToken>` (PDF + card images).
+6. **Google Sheets log** — each visit is written as one row (`lib/sheets.js`)
+   in a Google Sheet, updated in place as it progresses: appended when
+   scheduled (by patient or staff), updated with provider + completion time
+   once the clinician finishes. Best-effort — a Sheets outage never blocks a
+   visit from being scheduled or completed.
 
 ### Links & access control
 
@@ -79,6 +84,10 @@ tiny index blob at `yvy/tok/<token>.json`.
 | `OFFICE_EMAIL` | office inbox for new-visit notifications |
 | `YVY_EMAIL` | Yeled V'Yalda inbox for completed-attestation notifications |
 | `TEAMS_WEBHOOK_URL` | optional — Teams incoming webhook / Workflows URL |
+| `GOOGLE_SHEETS_CLIENT_EMAIL` | service account email (`…@…iam.gserviceaccount.com`) |
+| `GOOGLE_SHEETS_PRIVATE_KEY` | service account private key (PEM, with `\n`s) |
+| `GOOGLE_SHEETS_SPREADSHEET_ID` | target spreadsheet ID (from its URL) |
+| `GOOGLE_SHEETS_TAB` | tab name to write to (defaults to `Sheet1`) |
 
 ### Configuration to review before go-live
 

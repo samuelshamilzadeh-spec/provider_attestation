@@ -1,6 +1,7 @@
 import { assertBlobConfigured, loadRecordByToken, saveRecord, uploadBuffer, siteOrigin } from '../../lib/store.js';
 import { sendMail, renderEmail } from '../../lib/notify.js';
 import { generateAttestationPdf } from '../../lib/attestation_pdf.js';
+import { syncVisitRow } from '../../lib/sheets.js';
 
 export const config = { api: { bodyParser: { sizeLimit: '4mb' } } };
 
@@ -59,6 +60,7 @@ export default async function handler(req, res) {
       pdfUrl
     };
     await saveRecord(record);
+    await syncVisitRow(record);
 
     // Docs link carries the DOCS token and is only ever sent to Yeled V'Yalda.
     const docsLink = `${siteOrigin(req)}/yvy/docs?t=${record.docsToken}`;

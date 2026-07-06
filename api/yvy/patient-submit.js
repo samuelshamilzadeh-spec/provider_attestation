@@ -1,5 +1,6 @@
 import { assertBlobConfigured, loadRecordByToken, saveRecord, uploadDataUrl, siteOrigin } from '../../lib/store.js';
 import { validSlot, validPhone, notifyOffice } from '../../lib/visit.js';
+import { syncVisitRow } from '../../lib/sheets.js';
 
 export const config = { api: { bodyParser: { sizeLimit: '4mb' } } };
 
@@ -68,7 +69,10 @@ export default async function handler(req, res) {
     // The clinician link carries the VISIT token and is only ever sent to the
     // office — the patient never receives it.
     const visitLink = `${siteOrigin(req)}/yvy/visit?t=${record.visitToken}`;
-    await notifyOffice({ record, visitLink });
+    await Promise.all([
+      notifyOffice({ record, visitLink }),
+      syncVisitRow(record)
+    ]);
 
     return res.status(200).json({ success: true });
   } catch (err) {

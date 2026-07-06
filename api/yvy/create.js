@@ -2,6 +2,7 @@ import crypto from 'crypto';
 import { assertBlobConfigured, saveRecord, saveTokenIndex, uploadDataUrl, siteOrigin } from '../../lib/store.js';
 import { sendMail, renderEmail } from '../../lib/notify.js';
 import { validSlot, validPhone, notifyOffice } from '../../lib/visit.js';
+import { syncVisitRow } from '../../lib/sheets.js';
 
 export const config = { api: { bodyParser: { sizeLimit: '4mb' } } };
 
@@ -104,7 +105,10 @@ export default async function handler(req, res) {
 
     if (mode === 'staff') {
       const visitLink = `${siteOrigin(req)}/yvy/visit?t=${visitToken}`;
-      await notifyOffice({ record, visitLink });
+      await Promise.all([
+        notifyOffice({ record, visitLink }),
+        syncVisitRow(record)
+      ]);
       return res.status(200).json({ scheduled: true });
     }
 
