@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import { assertBlobConfigured, saveRecord, saveTokenIndex, uploadDataUrl, siteOrigin } from '../../lib/store.js';
 import { sendMail, renderEmail } from '../../lib/notify.js';
-import { validSlot, notifyOffice } from '../../lib/visit.js';
+import { validSlot, validPhone, notifyOffice } from '../../lib/visit.js';
 
 export const config = { api: { bodyParser: { sizeLimit: '4mb' } } };
 
@@ -24,7 +24,7 @@ export default async function handler(req, res) {
   const {
     mode = 'send', firstName, lastName, dob, language, leadEntity, patientEmail,
     // staff-mode fields
-    address, city, state, zip, insuranceCarrier, insuranceMemberId,
+    phone, address, city, state, zip, insuranceCarrier, insuranceMemberId,
     visitDate, visitTime, cardFront, cardBack
   } = body || {};
 
@@ -60,6 +60,7 @@ export default async function handler(req, res) {
     // ── STAFF MODE: staff fills the patient details now. Insurance-card photos
     //    are OPTIONAL here; relationship is not collected. ────────────────────
     if (mode === 'staff') {
+      if (!validPhone(phone)) return res.status(400).json({ error: 'A valid 10-digit phone number is required.' });
       if (!address?.trim() || !city?.trim() || !state?.trim() || !zip?.trim()) {
         return res.status(400).json({ error: 'Full address is required.' });
       }
@@ -78,6 +79,7 @@ export default async function handler(req, res) {
       record.submission = {
         submittedAt: new Date().toISOString(),
         source: 'staff',
+        phone: phone.trim(),
         address: address.trim(),
         city: city.trim(),
         state: state.trim(),

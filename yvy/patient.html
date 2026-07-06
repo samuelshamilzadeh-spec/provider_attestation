@@ -23,7 +23,11 @@
 
   <div class="who" id="whobox"></div>
 
-  <div class="slbl" data-t="address"></div>
+  <div class="slbl" data-t="contact"></div>
+  <div class="ff"><label for="phone" data-t="phone"></label><input type="tel" id="phone" data-mask="phone" inputmode="tel" data-ph="phPhone" placeholder="(555) 123-4567" maxlength="14"></div>
+  <div class="fhint" style="margin-top:-16px" data-t="phoneNote"></div>
+
+  <div class="slbl" style="margin-top:1.5rem" data-t="address"></div>
   <div class="ff"><label for="addr" data-t="street"></label><input type="text" id="addr" data-ph="phStreet" placeholder="123 Main St" autocomplete="street-address"></div>
   <div class="ff"><label for="city" data-t="city"></label><input type="text" id="city" data-ph="phCity" placeholder="Brooklyn" autocomplete="address-level2"></div>
   <div class="ffrow narrow-right">
@@ -110,6 +114,7 @@ const images = { front: null, back: null };
 const T = {
   en: {
     formFor:'This form is for', dobLabel:'Date of birth',
+    contact:'Contact number', phone:'Phone number', phoneNote:'The clinician will call this number at your appointment time.',
     address:'Home address', street:'Street address', city:'City', state:'State', zip:'ZIP code',
     insurance:'Insurance', carrier:'Insurance carrier', memberId:'Insurance member ID',
     cardPhotos:'Insurance card photos', cardFront:'Front of card', cardBack:'Back of card',
@@ -122,11 +127,12 @@ const T = {
     visitDate:'Visit date', visitTime:'Visit time',
     submit:'Submit', submitting:'Submitting…',
     pleaseEnter:'Please enter', pleaseChoose:'Please choose',
-    phStreet:'123 Main St', phCity:'Brooklyn', phState:'NY', phZip:'11204',
+    phStreet:'123 Main St', phCity:'Brooklyn', phState:'NY', phZip:'11204', phPhone:'(555) 123-4567',
     phCarrier:'e.g. Fidelis Care', phMember:'Member ID', phName:'Full name',
     okTitle:'Thank you!',
     okText:'Your visit has been scheduled for {when}. A clinician will call you at that time.',
     errFields:'Please complete the highlighted fields.',
+    errPhone:'Please enter a valid 10-digit phone number.',
     errPhotos:'Please upload photos of the front and back of your insurance card.',
     errDate:'Please enter a valid visit date (MM/DD/YYYY).',
     errWeekend:'Please choose a weekday (Monday to Friday).',
@@ -138,6 +144,7 @@ const T = {
   },
   es: {
     formFor:'Este formulario es para', dobLabel:'Fecha de nacimiento',
+    contact:'Número de contacto', phone:'Número de teléfono', phoneNote:'El clínico llamará a este número a la hora de su cita.',
     address:'Dirección de casa', street:'Dirección', city:'Ciudad', state:'Estado', zip:'Código postal',
     insurance:'Seguro médico', carrier:'Compañía de seguro', memberId:'Número de miembro del seguro',
     cardPhotos:'Fotos de la tarjeta de seguro', cardFront:'Frente de la tarjeta', cardBack:'Reverso de la tarjeta',
@@ -150,11 +157,12 @@ const T = {
     visitDate:'Fecha de la visita', visitTime:'Hora de la visita',
     submit:'Enviar', submitting:'Enviando…',
     pleaseEnter:'Por favor ingrese', pleaseChoose:'Por favor seleccione',
-    phStreet:'123 Calle Principal', phCity:'Brooklyn', phState:'NY', phZip:'11204',
+    phStreet:'123 Calle Principal', phCity:'Brooklyn', phState:'NY', phZip:'11204', phPhone:'(555) 123-4567',
     phCarrier:'p. ej. Fidelis Care', phMember:'Número de miembro', phName:'Nombre completo',
     okTitle:'¡Gracias!',
     okText:'Su visita ha sido programada para el {when}. Un clínico le llamará a esa hora.',
     errFields:'Por favor complete los campos marcados.',
+    errPhone:'Por favor ingrese un número de teléfono válido de 10 dígitos.',
     errPhotos:'Por favor suba fotos del frente y reverso de su tarjeta de seguro.',
     errDate:'Por favor ingrese una fecha de visita válida (MM/DD/AAAA).',
     errWeekend:'Por favor elija un día entre lunes y viernes.',
@@ -195,6 +203,11 @@ function clearFieldErrs(){document.querySelectorAll('.ff.err').forEach(f=>f.clas
 // Date mask + validation
 function formatDateMask(d){d=d.replace(/\D/g,'').slice(0,8);let o=d.slice(0,2);if(d.length>=3)o+='/'+d.slice(2,4);if(d.length>=5)o+='/'+d.slice(4,8);return o}
 function isValidDate(s){const m=/^(\d{2})\/(\d{2})\/(\d{4})$/.exec(s);if(!m)return false;const d=new Date(+m[3],+m[1]-1,+m[2]);return d.getFullYear()===+m[3]&&d.getMonth()===+m[1]-1&&d.getDate()===+m[2]}
+
+// Phone mask + validation
+function formatPhoneMask(v){const d=v.replace(/\D/g,'').slice(0,10);if(d.length<=3)return d;if(d.length<=6)return `(${d.slice(0,3)}) ${d.slice(3)}`;return `(${d.slice(0,3)}) ${d.slice(3,6)}-${d.slice(6)}`}
+$('phone').addEventListener('input',e=>{const el=e.target;const f=formatPhoneMask(el.value);el.value=f;el.setSelectionRange(f.length,f.length)});
+function isValidPhone(s){return s.replace(/\D/g,'').length===10}
 function maskToIso(s){const m=/^(\d{2})\/(\d{2})\/(\d{4})$/.exec(s);return m?`${m[3]}-${m[1]}-${m[2]}`:''}
 
 // ── INIT ────────────────────────────────────────────────────────
@@ -288,6 +301,8 @@ function isPast(iso){const [y,mo,d]=iso.split('-').map(Number);const pick=new Da
 async function doSubmit(){
   clearErr(); clearFieldErrs();
   let bad=false;
+  if(!$('phone').value.trim()){reqInput('phone');bad=true}
+  else if(!isValidPhone($('phone').value)){setErr('phone',t('errPhone'));bad=true}
   ['addr','city','state','zip','carrier','memberid'].forEach(id=>{if(!$(id).value.trim()){reqInput(id);bad=true}});
   if($('rel').selectedIndex<=0){reqSelect('rel');bad=true}
   if(!$('vtime').value){reqSelect('vtime');bad=true}
@@ -318,6 +333,7 @@ async function doSubmit(){
     const res=await fetch('/api/yvy/patient-submit',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         t:token,
+        phone:$('phone').value.trim(),
         address:$('addr').value.trim(), city:$('city').value.trim(),
         state:$('state').value.trim(), zip:$('zip').value.trim(),
         insuranceCarrier:$('carrier').value.trim(), insuranceMemberId:$('memberid').value.trim(),

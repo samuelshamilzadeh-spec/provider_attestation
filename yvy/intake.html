@@ -54,7 +54,11 @@
 
   <!-- STAFF MODE: enter the patient's details now -->
   <div id="staffFields" style="display:none">
-    <div class="slbl" style="margin-top:.5rem">Patient's address</div>
+    <div class="slbl" style="margin-top:.5rem">Contact number</div>
+    <div class="ff"><label for="sphone">Phone number</label><input type="tel" id="sphone" data-mask="phone" inputmode="tel" placeholder="(555) 123-4567" maxlength="14"></div>
+    <div class="fhint" style="margin-top:-16px;margin-bottom:22px">The clinician will call this number at the appointment time.</div>
+
+    <div class="slbl" style="margin-top:1.5rem">Patient's address</div>
     <div class="ff"><label for="addr">Street address</label><input type="text" id="addr" placeholder="123 Main St" autocomplete="off"></div>
     <div class="ff"><label for="city">City</label><input type="text" id="city" placeholder="Brooklyn" autocomplete="off"></div>
     <div class="ffrow narrow-right">
@@ -133,6 +137,7 @@ const MSG = {
   dob:'Please enter a valid date of birth (MM/DD/YYYY)',
   entity:'Please choose an SCN lead entity',
   pemail:"Please enter the patient's email",
+  sphone:"Please enter the patient's phone number",
   addr:'Please enter the street address',
   city:'Please enter the city',
   state:'Please enter the state',
@@ -188,6 +193,13 @@ function formatDateMask(d){d=d.replace(/\D/g,'').slice(0,8);let o=d.slice(0,2);i
 document.querySelectorAll('input[data-mask="date"]').forEach(el=>{
   el.addEventListener('input',e=>{const del=e.inputType&&e.inputType.startsWith('delete');const f=formatDateMask(el.value);el.value=f;if(!del)el.setSelectionRange(f.length,f.length)});
 });
+
+// Phone mask (MM/DD/YYYY-style progressive formatting) on all phone inputs
+function formatPhoneMask(v){const d=v.replace(/\D/g,'').slice(0,10);if(d.length<=3)return d;if(d.length<=6)return `(${d.slice(0,3)}) ${d.slice(3)}`;return `(${d.slice(0,3)}) ${d.slice(3,6)}-${d.slice(6)}`}
+document.querySelectorAll('input[data-mask="phone"]').forEach(el=>{
+  el.addEventListener('input',e=>{const f=formatPhoneMask(el.value);el.value=f;el.setSelectionRange(f.length,f.length)});
+});
+function isValidPhone(s){return s.replace(/\D/g,'').length===10}
 
 // Calendar pickers — DOB allows past dates (no weekend rule); visit date is
 // future weekdays only, matching the scheduling rules.
@@ -257,6 +269,8 @@ async function createVisit(){
     else if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(pemail)){setErr('pemail','Please enter a valid email address');bad=true}
     payload.patientEmail=pemail;
   } else {
+    if(!$('sphone').value.trim()){setErr('sphone');bad=true}
+    else if(!isValidPhone($('sphone').value)){setErr('sphone','Please enter a valid 10-digit phone number');bad=true}
     if(!$('addr').value.trim()){setErr('addr');bad=true}
     if(!$('city').value.trim()){setErr('city');bad=true}
     if(!$('state').value.trim()){setErr('state');bad=true}
@@ -272,6 +286,7 @@ async function createVisit(){
       else if(isPast(iso)){setErr('vdate','Please choose a visit date in the future');bad=true}
     }
     Object.assign(payload,{
+      phone:$('sphone').value.trim(),
       address:$('addr').value.trim(), city:$('city').value.trim(), state:$('state').value.trim(), zip:$('zip').value.trim(),
       insuranceCarrier:$('carrier').value.trim(), insuranceMemberId:$('memberid').value.trim(),
       visitDate:maskToIso(vdateMask), visitTime:$('vtime').value,
@@ -321,7 +336,7 @@ function copyLink(){
 
 function another(){
   clearAllErrs();
-  ['fn','ln','dob','pemail','addr','city','zip','carrier','memberid','vdate'].forEach(id=>{const el=$(id);if(el)el.value=''});
+  ['fn','ln','dob','pemail','sphone','addr','city','zip','carrier','memberid','vdate'].forEach(id=>{const el=$(id);if(el)el.value=''});
   $('state').value='NY';
   $('entity').selectedIndex=0; $('vtime').selectedIndex=0;
   images.front=images.back=null;

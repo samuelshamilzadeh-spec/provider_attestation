@@ -1,5 +1,5 @@
 import { assertBlobConfigured, loadRecordByToken, saveRecord, uploadDataUrl, siteOrigin } from '../../lib/store.js';
-import { validSlot, notifyOffice } from '../../lib/visit.js';
+import { validSlot, validPhone, notifyOffice } from '../../lib/visit.js';
 
 export const config = { api: { bodyParser: { sizeLimit: '4mb' } } };
 
@@ -16,7 +16,7 @@ export default async function handler(req, res) {
     try { body = JSON.parse(body); } catch { return res.status(400).json({ error: 'Invalid JSON body' }); }
   }
   const {
-    t, address, city, state, zip, insuranceCarrier, insuranceMemberId,
+    t, phone, address, city, state, zip, insuranceCarrier, insuranceMemberId,
     relationship, fillerName, visitDate, visitTime, cardFront, cardBack
   } = body || {};
 
@@ -27,6 +27,7 @@ export default async function handler(req, res) {
     if (!record) return res.status(404).json({ error: 'Visit not found' });
     if (record.status === 'completed') return res.status(409).json({ error: 'This visit has already been completed.' });
 
+    if (!validPhone(phone)) return res.status(400).json({ error: 'A valid 10-digit phone number is required.' });
     if (!address?.trim() || !city?.trim() || !state?.trim() || !zip?.trim()) {
       return res.status(400).json({ error: 'Full address is required.' });
     }
@@ -48,6 +49,7 @@ export default async function handler(req, res) {
     record.submission = {
       submittedAt: new Date().toISOString(),
       source: 'patient',
+      phone: phone.trim(),
       address: address.trim(),
       city: city.trim(),
       state: state.trim(),

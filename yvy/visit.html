@@ -203,6 +203,7 @@ const fileUrl = which => `/api/yvy/file?role=visit&which=${which}&t=${encodeURIC
   // the Stand Out flow (name / DOB / insurance pre-filled).
   const rows=[
     ['Patient', record.firstName+' '+record.lastName],
+    ['Phone', s.phone||'Not provided'],
     ['DOB', isoToMask(record.dob)],
     ['Insurance', s.insuranceCarrier?`${s.insuranceCarrier}, ${s.insuranceMemberId}`:'Not provided']
   ];
