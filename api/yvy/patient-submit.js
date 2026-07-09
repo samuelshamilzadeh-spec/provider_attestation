@@ -1,6 +1,7 @@
 import { assertBlobConfigured, loadRecordByToken, saveRecord, uploadDataUrl, siteOrigin } from '../../lib/store.js';
 import { validSlot, validPhone, notifyOffice } from '../../lib/visit.js';
 import { syncVisitRow } from '../../lib/sheets.js';
+import { sanitizePreScreen } from '../../lib/prescreen.js';
 
 export const config = { api: { bodyParser: { sizeLimit: '4mb' } } };
 
@@ -18,7 +19,7 @@ export default async function handler(req, res) {
   }
   const {
     t, phone, address, city, state, zip, insuranceCarrier, insuranceMemberId,
-    relationship, fillerName, visitDate, visitTime, cardFront, cardBack
+    relationship, fillerName, visitDate, visitTime, cardFront, cardBack, preScreen
   } = body || {};
 
   try {
@@ -62,7 +63,8 @@ export default async function handler(req, res) {
       visitDate,
       visitTime,
       cardFrontUrl,
-      cardBackUrl
+      cardBackUrl,
+      preScreen: sanitizePreScreen(preScreen)
     };
     await saveRecord(record);
 

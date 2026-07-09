@@ -3,6 +3,7 @@ import { assertBlobConfigured, saveRecord, saveTokenIndex, uploadDataUrl, siteOr
 import { sendMail, renderEmail } from '../../lib/notify.js';
 import { validSlot, validPhone, notifyOffice } from '../../lib/visit.js';
 import { syncVisitRow } from '../../lib/sheets.js';
+import { sanitizePreScreen } from '../../lib/prescreen.js';
 
 export const config = { api: { bodyParser: { sizeLimit: '4mb' } } };
 
@@ -26,7 +27,7 @@ export default async function handler(req, res) {
     mode = 'send', firstName, lastName, dob, language, leadEntity, patientEmail,
     // staff-mode fields
     phone, address, city, state, zip, insuranceCarrier, insuranceMemberId,
-    visitDate, visitTime, cardFront, cardBack
+    visitDate, visitTime, cardFront, cardBack, preScreen
   } = body || {};
 
   if (!firstName?.trim() || !lastName?.trim()) return res.status(400).json({ error: 'Patient first and last name are required' });
@@ -92,7 +93,8 @@ export default async function handler(req, res) {
         visitDate,
         visitTime,
         cardFrontUrl,
-        cardBackUrl
+        cardBackUrl,
+        preScreen: sanitizePreScreen(preScreen)
       };
     }
 

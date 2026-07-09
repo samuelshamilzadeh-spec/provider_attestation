@@ -38,6 +38,7 @@
 <!-- ── STEP B: CRITERIA ── -->
 <div class="step card" id="sB">
   <div class="slbl">Check all criteria that apply to this member</div>
+  <div id="prescreenNote"></div>
 
   <div class="cgrp">
     <div class="chd">Behavioral &amp; Developmental Health Needs</div>
@@ -174,6 +175,7 @@
 
 </div>
 
+<script src="/yvy/prescreen.js"></script>
 <script>
 const $ = id => document.getElementById(id);
 const token = new URLSearchParams(location.search).get('t');
@@ -225,6 +227,25 @@ const fileUrl = which => `/api/yvy/file?role=visit&which=${which}&t=${encodeURIC
   if(record.status==='completed'){
     const link=record.completion&&record.completion.pdf ? fileUrl('pdf') : null;
     $('warnbox').innerHTML='<div class="warn">This attestation was already completed.'+(link?` <a href="${link}" target="_blank" rel="noopener">View the signed PDF.</a>`:'')+' Submitting again will replace it.</div>';
+  }
+
+  // Pre-check clinician criteria boxes based on the intake-time eligibility
+  // pre-screen answers (see yvy/prescreen.js for the mapping). Anything with
+  // no direct mapping (SMI/SUD/IDD) is surfaced as a note instead, since it's
+  // too broad to guess which single box applies.
+  const preScreen = s.preScreen || [];
+  const valuesToCheck = new Set();
+  const flags = [];
+  (window.YVY_PRESCREEN||[]).forEach(q=>{
+    if(!preScreen.includes(q.key)) return;
+    if(q.criteria && q.criteria.length) q.criteria.forEach(v=>valuesToCheck.add(v));
+    else if(q.flagNote) flags.push(q.flagNote);
+  });
+  if(valuesToCheck.size){
+    document.querySelectorAll('input[name=c]').forEach(cb=>{ if(valuesToCheck.has(cb.value)) cb.checked=true; });
+  }
+  if(flags.length){
+    $('prescreenNote').innerHTML = flags.map(f=>`<div class="warn">${esc(f)}</div>`).join('');
   }
 
   show('sA');

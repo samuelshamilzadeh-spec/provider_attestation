@@ -56,6 +56,10 @@
     </div>
   </div>
 
+  <div class="slbl" style="margin-top:1.5rem" data-t="prescreenTitle"></div>
+  <div class="fhint" style="margin-top:-8px;margin-bottom:8px" data-t="prescreenNote"></div>
+  <div class="cgrp" id="prescreenGrp"></div>
+
   <div class="slbl" style="margin-top:1.5rem" data-t="whoFilling"></div>
   <div class="ff">
     <label for="rel" data-t="relationship"></label>
@@ -103,6 +107,7 @@
 
 <script src="/yvy/config.js"></script>
 <script src="/yvy/calendar.js"></script>
+<script src="/yvy/prescreen.js"></script>
 <script>
 const $ = id => document.getElementById(id);
 const params = new URLSearchParams(location.search);
@@ -121,6 +126,14 @@ const T = {
     tapUpload:'Tap to take a photo or upload', replace:'Tap to replace',
     whoFilling:'Person completing this form', relationship:'Relationship to patient',
     fillerName:'Your full name',
+    prescreenTitle:'Do any of the following apply to you or your child?',
+    prescreenNote:'Check any that apply. This helps the clinician prepare for your visit.',
+    ps_medicaidHighUtilizer:'High Medicaid utilizer',
+    ps_nysHealthHome:'Enrolled in a NYS Health Home',
+    ps_smiSudIdd:'Severe mental illness, substance use disorder, or an intellectual/developmental disability',
+    ps_highRiskWeight:'High risk under age 18 (overweight, underweight, or malnourished)',
+    ps_highRiskChronic:'High risk under age 18 with a chronic condition',
+    ps_chronicIncarceration:'Chronic condition, released from incarceration within the last 90 days',
     rels:['Self','Parent','Legal guardian','Spouse','Other family member','Other'],
     schedule:'Schedule your visit',
     schedNote:'Visits are by phone, Monday through Friday, between {open} and {close}.',
@@ -151,6 +164,14 @@ const T = {
     tapUpload:'Toque para tomar una foto o subir', replace:'Toque para reemplazar',
     whoFilling:'Persona que completa este formulario', relationship:'Relación con el paciente',
     fillerName:'Su nombre completo',
+    prescreenTitle:'¿Aplica alguno de los siguientes a usted o a su hijo/a?',
+    prescreenNote:'Marque los que apliquen. Esto ayuda al clínico a prepararse para su visita.',
+    ps_medicaidHighUtilizer:'Alto uso de Medicaid',
+    ps_nysHealthHome:'Inscrito en un NYS Health Home',
+    ps_smiSudIdd:'Enfermedad mental grave, trastorno por uso de sustancias, o una discapacidad intelectual/del desarrollo',
+    ps_highRiskWeight:'Alto riesgo menor de 18 años (sobrepeso, bajo peso, o desnutrición)',
+    ps_highRiskChronic:'Alto riesgo menor de 18 años con una condición crónica',
+    ps_chronicIncarceration:'Condición crónica, liberado de encarcelamiento en los últimos 90 días',
     rels:['Yo mismo/a','Padre/Madre','Tutor legal','Cónyuge','Otro familiar','Otro'],
     schedule:'Programe su visita',
     schedNote:'Las visitas son por teléfono, de lunes a viernes, entre {open} y {close}.',
@@ -236,6 +257,17 @@ function maskToIso(s){const m=/^(\d{2})\/(\d{2})\/(\d{4})$/.exec(s);return m?`${
   const rel=$('rel');
   t('rels').forEach((label,i)=>{const o=document.createElement('option');o.value=T.en.rels[i];o.textContent=label;rel.appendChild(o)});
   rel.addEventListener('change',()=>{ $('fillerwrap').style.display = (rel.value && rel.value!=='Self') ? 'block':'none' });
+
+  // Eligibility pre-screen checkboxes (order/keys from prescreen.js, labels translated here)
+  const psGrp=$('prescreenGrp');
+  (window.YVY_PRESCREEN||[]).forEach(q=>{
+    const row=document.createElement('label');
+    row.className='ci';
+    row.innerHTML='<input type="checkbox"><div><div class="cin"></div></div>';
+    row.querySelector('input').dataset.pskey=q.key;
+    row.querySelector('.cin').textContent=t('ps_'+q.key);
+    psGrp.appendChild(row);
+  });
 
   // Date mask + calendar picker for visit date (future weekdays only, in the
   // patient's language).
@@ -339,7 +371,8 @@ async function doSubmit(){
         insuranceCarrier:$('carrier').value.trim(), insuranceMemberId:$('memberid').value.trim(),
         relationship:$('rel').value, fillerName:$('filler').value.trim(),
         visitDate:maskToIso(dateMask), visitTime:$('vtime').value,
-        cardFront:images.front, cardBack:images.back
+        cardFront:images.front, cardBack:images.back,
+        preScreen:[...document.querySelectorAll('#prescreenGrp input:checked')].map(el=>el.dataset.pskey)
       })});
     const data=await res.json().catch(()=>({error:'Invalid server response'}));
     if(!res.ok||data.error)throw new Error(data.error||'Submission failed');

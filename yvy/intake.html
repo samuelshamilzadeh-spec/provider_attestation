@@ -88,6 +88,10 @@
       </div>
     </div>
 
+    <div class="slbl" style="margin-top:1.5rem">Eligibility screening</div>
+    <div class="fhint" style="margin-top:-8px;margin-bottom:8px">Check any that apply. These pre-check matching boxes for the clinician.</div>
+    <div class="cgrp" id="prescreenGrp"></div>
+
     <div class="slbl" style="margin-top:1.5rem">Schedule the visit</div>
     <div class="note" id="schednote"></div>
     <div class="ffrow">
@@ -124,6 +128,7 @@
 
 <script src="/yvy/config.js"></script>
 <script src="/yvy/calendar.js"></script>
+<script src="/yvy/prescreen.js"></script>
 <script>
 const $ = id => document.getElementById(id);
 let lang = 'en', mode = 'send';
@@ -153,6 +158,19 @@ const MSG = {
   const sel = $('entity');
   (window.YVY_LEAD_ENTITIES || []).forEach(n => {
     const o = document.createElement('option'); o.value = o.textContent = n; sel.appendChild(o);
+  });
+})();
+
+// Populate eligibility pre-screen checkboxes (staff mode) from prescreen.js
+(function(){
+  const grp = $('prescreenGrp');
+  (window.YVY_PRESCREEN || []).forEach(q => {
+    const row = document.createElement('label');
+    row.className = 'ci';
+    row.innerHTML = '<input type="checkbox"><div><div class="cin"></div></div>';
+    row.querySelector('input').dataset.pskey = q.key;
+    row.querySelector('.cin').textContent = q.label;
+    grp.appendChild(row);
   });
 })();
 
@@ -290,7 +308,8 @@ async function createVisit(){
       address:$('addr').value.trim(), city:$('city').value.trim(), state:$('state').value.trim(), zip:$('zip').value.trim(),
       insuranceCarrier:$('carrier').value.trim(), insuranceMemberId:$('memberid').value.trim(),
       visitDate:maskToIso(vdateMask), visitTime:$('vtime').value,
-      cardFront:images.front||'', cardBack:images.back||''
+      cardFront:images.front||'', cardBack:images.back||'',
+      preScreen:[...document.querySelectorAll('#prescreenGrp input:checked')].map(el=>el.dataset.pskey)
     });
   }
 
@@ -339,6 +358,7 @@ function another(){
   ['fn','ln','dob','pemail','sphone','addr','city','zip','carrier','memberid','vdate'].forEach(id=>{const el=$(id);if(el)el.value=''});
   $('state').value='NY';
   $('entity').selectedIndex=0; $('vtime').selectedIndex=0;
+  document.querySelectorAll('#prescreenGrp input[type=checkbox]').forEach(el=>el.checked=false);
   images.front=images.back=null;
   ['front','back'].forEach(side=>{
     const tile=$('tile-'+side); if(!tile)return;
