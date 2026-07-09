@@ -12,6 +12,17 @@ export const config = { api: { bodyParser: { sizeLimit: '4mb' } } };
 const PRESCREEN_KEYS = ['medicaidHighUtilizer', 'nysHealthHome', 'smiSudIdd', 'highRiskWeight', 'highRiskChronic', 'chronicIncarceration'];
 const cleanPreScreen = v => Array.isArray(v) ? v.filter(k => PRESCREEN_KEYS.includes(k)) : [];
 
+// Runs a best-effort side task (office notification, sheet sync) that must
+// never fail or hang the request: the visit is already saved, so we swallow
+// errors and give up after `ms` to guarantee a prompt JSON response well
+// within the platform's function time limit.
+function bestEffort(promise, ms, label) {
+  return Promise.race([
+    Promise.resolve().then(() => promise).catch(err => console.error(`${label} failed:`, err && err.message)),
+    new Promise(res => setTimeout(res, ms))
+  ]);
+}
+
 // Staff intake. Two modes:
 //   'send'  — create the visit and email/hand the patient a link to fill in
 //             their own details (address, insurance, card photos, schedule).
@@ -112,10 +123,12 @@ export default async function handler(req, res) {
 
     if (mode === 'staff') {
       const visitLink = `${siteOrigin(req)}/yvy/visit?t=${visitToken}`;
-      await Promise.all([
+      // Best-effort: the visit is already saved, so notification + sheet sync
+      // must never fail or hang the response.
+      await bestEffort(Promise.all([
         notifyOffice({ record, visitLink }),
         syncVisitRow(record, siteOrigin(req))
-      ]);
+      ]), 6500, 'notify/sync');
       return res.status(200).json({ scheduled: true });
     }
 
