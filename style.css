@@ -1,4 +1,8 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+/* Disable the browser's pull-to-refresh gesture. Without this, a downward
+   touch while signing (or drifting off the signature canvas) reloads the page
+   mid-attestation and the signature is lost before it can be submitted. */
+html,body{overscroll-behavior-y:contain}
 :root{
   --navy:#183866;--navy2:#0f2547;
   --pink:#eb4a99;--pink2:#d63a87;

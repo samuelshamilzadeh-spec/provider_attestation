@@ -139,7 +139,7 @@
       <canvas id="sigpad" width="600" height="180"></canvas>
     </div>
     <div class="sigfoot">
-      <button class="bclr" onclick="clearSig()">↺ Clear</button>
+      <button type="button" class="bclr" onclick="clearSig()">↺ Clear</button>
       <span class="signote">Sign with mouse or finger</span>
     </div>
   </div>
@@ -149,8 +149,8 @@
   <div class="errmsg" id="errmsg"></div>
 
   <div class="nav">
-    <button class="btn" onclick="go('sB')">← Back</button>
-    <button class="btn btn-p" id="subbtn" onclick="doSubmit()">Complete attestation</button>
+    <button type="button" class="btn" onclick="go('sB')">← Back</button>
+    <button type="button" class="btn btn-p" id="subbtn" onclick="doSubmit()">Complete attestation</button>
   </div>
 </div>
 
@@ -179,7 +179,15 @@
 <script>
 const $ = id => document.getElementById(id);
 const token = new URLSearchParams(location.search).get('t');
-let record = null, selProvider = '', hasSig = false;
+let record = null, selProvider = '', hasSig = false, submitted = false;
+
+// Safety net: if the provider has drawn a signature but the attestation hasn't
+// been submitted yet, warn before the page unloads (accidental refresh, back
+// gesture, closed tab). Prevents a signed-but-not-submitted page from silently
+// dropping the work. Cleared once the submission succeeds.
+window.addEventListener('beforeunload', (e) => {
+  if (hasSig && !submitted) { e.preventDefault(); e.returnValue = ''; }
+});
 
 function show(id){['loadmsg','sA','sB','sC','sok','sbad'].forEach(s=>{const el=$(s);el.classList.remove('on');el.style.display=s==='loadmsg'?'none':''});$(id).classList.add('on');if(id==='loadmsg')$(id).style.display=''}
 function go(id){show(id);window.scrollTo({top:0,behavior:'smooth'});if(id==='sC')requestAnimationFrame(resizeCanvas)}
@@ -311,6 +319,7 @@ async function doSubmit(){
     const data=await res.json().catch(()=>({error:'Invalid server response'}));
     if(!res.ok||data.error)throw new Error(data.error||'Submission failed');
 
+    submitted=true; // attestation is saved — release the unsaved-work guard
     $('pdflink').href=fileUrl('pdf');
     show('sok');
     window.scrollTo({top:0,behavior:'smooth'});
