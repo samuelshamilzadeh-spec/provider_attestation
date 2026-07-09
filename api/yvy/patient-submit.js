@@ -1,9 +1,14 @@
 import { assertBlobConfigured, loadRecordByToken, saveRecord, uploadDataUrl, siteOrigin } from '../../lib/store.js';
 import { validSlot, validPhone, notifyOffice } from '../../lib/visit.js';
 import { syncVisitRow } from '../../lib/sheets.js';
-import { sanitizePreScreen } from '../../lib/prescreen.js';
 
 export const config = { api: { bodyParser: { sizeLimit: '4mb' } } };
+
+// Whitelist of the intake pre-screen keys (mirrors yvy/prescreen.js on the
+// client). Kept inline so this serverless function has no extra module to
+// resolve at load time.
+const PRESCREEN_KEYS = ['medicaidHighUtilizer', 'nysHealthHome', 'smiSudIdd', 'highRiskWeight', 'highRiskChronic', 'chronicIncarceration'];
+const cleanPreScreen = v => Array.isArray(v) ? v.filter(k => PRESCREEN_KEYS.includes(k)) : [];
 
 // Patient submission: address + insurance + card photos + relationship +
 // visit slot. Notifies the office (email + Teams) on success.
@@ -64,7 +69,7 @@ export default async function handler(req, res) {
       visitTime,
       cardFrontUrl,
       cardBackUrl,
-      preScreen: sanitizePreScreen(preScreen)
+      preScreen: cleanPreScreen(preScreen)
     };
     await saveRecord(record);
 

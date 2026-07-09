@@ -3,9 +3,14 @@ import { assertBlobConfigured, saveRecord, saveTokenIndex, uploadDataUrl, siteOr
 import { sendMail, renderEmail } from '../../lib/notify.js';
 import { validSlot, validPhone, notifyOffice } from '../../lib/visit.js';
 import { syncVisitRow } from '../../lib/sheets.js';
-import { sanitizePreScreen } from '../../lib/prescreen.js';
 
 export const config = { api: { bodyParser: { sizeLimit: '4mb' } } };
+
+// Whitelist of the intake pre-screen keys (mirrors yvy/prescreen.js on the
+// client). Kept inline so this serverless function has no extra module to
+// resolve at load time.
+const PRESCREEN_KEYS = ['medicaidHighUtilizer', 'nysHealthHome', 'smiSudIdd', 'highRiskWeight', 'highRiskChronic', 'chronicIncarceration'];
+const cleanPreScreen = v => Array.isArray(v) ? v.filter(k => PRESCREEN_KEYS.includes(k)) : [];
 
 // Staff intake. Two modes:
 //   'send'  — create the visit and email/hand the patient a link to fill in
@@ -94,7 +99,7 @@ export default async function handler(req, res) {
         visitTime,
         cardFrontUrl,
         cardBackUrl,
-        preScreen: sanitizePreScreen(preScreen)
+        preScreen: cleanPreScreen(preScreen)
       };
     }
 
