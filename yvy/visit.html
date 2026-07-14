@@ -252,9 +252,17 @@ const fileUrl = which => `/api/yvy/file?role=visit&which=${which}&t=${encodeURIC
   if(valuesToCheck.size){
     document.querySelectorAll('input[name=c]').forEach(cb=>{ if(valuesToCheck.has(cb.value)) cb.checked=true; });
   }
-  if(flags.length){
-    $('prescreenNote').innerHTML = flags.map(f=>`<div class="warn">${esc(f)}</div>`).join('');
+  // Tell the clinician exactly what was pre-filled so a pre-checked box is
+  // never mistaken for their own selection (or a glitch): a count banner for
+  // the auto-checked boxes, plus the flag note for anything that couldn't be
+  // mapped to a single box (SMI/SUD/IDD).
+  const psNotes=[];
+  if(valuesToCheck.size){
+    const n=valuesToCheck.size;
+    psNotes.push(`<div class="psbanner">${n} ${n===1?'item was':'items were'} pre-selected below from the patient's intake screening. Please review and adjust as needed.</div>`);
   }
+  flags.forEach(f=>psNotes.push(`<div class="warn">${esc(f)}</div>`));
+  if(psNotes.length) $('prescreenNote').innerHTML = psNotes.join('');
 
   show('sA');
 })();
