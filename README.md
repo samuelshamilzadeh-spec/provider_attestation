@@ -79,15 +79,35 @@ submitted code to its own label.
 | | Stand Out Care | Yeled V'Yalda |
 | --- | --- | --- |
 | Endpoint | `/api/disqualify` | `/api/yvy/disqualify` |
-| Emails | `OFFICE_EMAIL` | `OFFICE_EMAIL` + `YVY_EMAIL` |
+| Emails | `STANDOUT_EMAIL` | `OFFICE_EMAIL` + `YVY_EMAIL` |
+| Override | — | `DISQUALIFIED_EMAIL` |
 | Teams | yes (`TEAMS_WEBHOOK_URL`) | yes |
 | Stored | nothing (no record in this flow) | visit → `not_qualified` |
 | Sheet row | — | status `Not Qualified` + reason |
 
-`DISQUALIFIED_EMAIL`, if set, overrides the recipients for **both** flows.
 The email carries patient name, DOB, exam date, provider, reason and notes —
 but deliberately **no link**, since it reaches Yeled V'Yalda and the clinician
 visit token must never leave the office's inbox.
+
+### Where each flow's mail goes
+
+The two flows are kept apart on purpose: **nothing from Stand Out Care reaches
+Yeled V'Yalda**. Stand Out's two emails are configured in two different systems,
+because they are sent by two different things:
+
+| Stand Out Care email | Sent by | Set in |
+| --- | --- | --- |
+| Signed attestation (PDF attached) | `generate-attestation.yml` Action | `RECIPIENT_EMAIL` — **GitHub Actions secret** |
+| Patient did not qualify | `/api/disqualify` | `STANDOUT_EMAIL` — **Vercel env var** |
+
+To send both to one inbox, set **both** values to that address. They can't be
+collapsed into one: the Action deliberately reads its recipient from a GitHub
+secret rather than from the dispatch payload, because `/api/submit` is a public
+endpoint — taking the address from the request would let anyone have a signed
+attestation PDF mailed anywhere.
+
+`STANDOUT_EMAIL` falls back to `OFFICE_EMAIL` when unset, so an existing deploy
+keeps delivering; set it to stop Stand Out mail landing in the YVY-side inbox.
 
 **Reversibility.** Marking a YVY visit not-qualified is undoable: the visit
 link keeps working and shows a banner naming who marked it, when, and why.
@@ -135,9 +155,10 @@ tiny index blob at `yvy/tok/<token>.json`.
 | `GH_REPO`, `GH_PAT` | existing — Stand Out flow Action dispatch |
 | `BLOB_READ_WRITE_TOKEN` | Vercel Blob (auto-set when a Blob store is connected) |
 | `SMTP_USER`, `SMTP_PASS` | Gmail SMTP (same creds as the GitHub Action secrets) |
-| `OFFICE_EMAIL` | office inbox for new-visit notifications |
+| `OFFICE_EMAIL` | office inbox for new-visit notifications (YVY flow) |
 | `YVY_EMAIL` | Yeled V'Yalda inbox for completed-attestation notifications |
-| `DISQUALIFIED_EMAIL` | optional — overrides the recipients for "did not qualify" notices (defaults to the inboxes above) |
+| `STANDOUT_EMAIL` | Stand Out Care inbox for "did not qualify" notices (falls back to `OFFICE_EMAIL`). Match it with the `RECIPIENT_EMAIL` GitHub secret to route both Stand Out emails to one address |
+| `DISQUALIFIED_EMAIL` | optional — overrides the recipients for the **YVY** "did not qualify" notice |
 | `TEAMS_WEBHOOK_URL` | optional — Teams incoming webhook / Workflows URL |
 | `GOOGLE_SHEETS_CLIENT_EMAIL` | service account email (`…@…iam.gserviceaccount.com`) |
 | `GOOGLE_SHEETS_PRIVATE_KEY` | service account private key (PEM, with `\n`s) |
