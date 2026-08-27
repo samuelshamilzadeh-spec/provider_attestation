@@ -102,6 +102,11 @@
     <label class="ci"><input type="checkbox" name="c" value="Transitioning out of institutional / congregate care (last 90 days)"><div><div class="cin">Transitioning out of institutional / congregate care (last 90 days)</div><div class="cid">Discharged within 90 days from a nursing facility, group home, correctional facility, State Psychiatric, SRO, or acute care hospital.</div></div></label>
   </div>
 
+  <div class="dq-cta">
+    <button type="button" class="dq-link" onclick="openDisqualify()">This member does not qualify</button>
+    <div class="dq-note">No attestation is signed — the office is emailed the reason instead.</div>
+  </div>
+
   <div class="nav">
     <button class="btn" onclick="go(1)">← Back</button>
     <button class="btn btn-p" onclick="go(3)">Next: Provider &amp; sign →</button>
@@ -170,8 +175,19 @@
   </div>
 </div>
 
+<!-- ── DOES NOT QUALIFY — RECORDED ── -->
+<div class="step card" id="sdq">
+  <div class="okwrap">
+    <div class="okicon">✓</div>
+    <h2>Recorded — member does not qualify</h2>
+    <p>No attestation was signed. The office has been emailed the member's name, exam date, provider, and reason.</p>
+    <button class="btn" onclick="reset()">Start another attestation</button>
+  </div>
+</div>
+
 </div><!-- /wrap -->
 
+<script src="/disqualify.js"></script>
 <script src="/app.js"></script>
 </body>
 </html>

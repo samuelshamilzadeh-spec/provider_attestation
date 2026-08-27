@@ -99,6 +99,11 @@
     <label class="ci"><input type="checkbox" name="c" value="Transitioning out of institutional / congregate care (last 90 days)"><div><div class="cin">Transitioning out of institutional / congregate care (last 90 days)</div><div class="cid">Discharged within 90 days from a nursing facility, group home, correctional facility, State Psychiatric, SRO, or acute care hospital.</div></div></label>
   </div>
 
+  <div class="dq-cta" id="dqcta">
+    <button type="button" class="dq-link" onclick="openDisqualify()">This patient does not qualify</button>
+    <div class="dq-note">No attestation is signed — the office and Yeled V'Yalda are emailed the reason instead.</div>
+  </div>
+
   <div class="nav">
     <button class="btn" onclick="go('sA')">← Back</button>
     <button class="btn btn-p" onclick="go('sC')">Next: Provider &amp; sign →</button>
@@ -164,6 +169,15 @@
   </div>
 </div>
 
+<!-- ── DOES NOT QUALIFY — RECORDED ── -->
+<div class="step card" id="sdq">
+  <div class="okwrap">
+    <div class="okicon">✓</div>
+    <h2>Recorded — patient does not qualify</h2>
+    <p id="dqmsg">No attestation was signed. The patient's name, exam date, provider, and reason have been emailed to the office and Yeled V'Yalda.</p>
+  </div>
+</div>
+
 <!-- ── ERROR / NOT FOUND ── -->
 <div class="step card" id="sbad">
   <div class="okwrap">
@@ -176,9 +190,12 @@
 </div>
 
 <script src="/yvy/prescreen.js"></script>
+<script src="/disqualify.js"></script>
 <script>
 const $ = id => document.getElementById(id);
 const token = new URLSearchParams(location.search).get('t');
+// Matches disqualifyRecipients('yvy') in lib/disqualify.js.
+const DQ_RECIPIENTS = "the office and Yeled V'Yalda";
 let record = null, selProvider = '', hasSig = false, submitted = false;
 
 // Safety net: if the provider has drawn a signature but the attestation hasn't
@@ -189,8 +206,19 @@ window.addEventListener('beforeunload', (e) => {
   if (hasSig && !submitted) { e.preventDefault(); e.returnValue = ''; }
 });
 
-function show(id){['loadmsg','sA','sB','sC','sok','sbad'].forEach(s=>{const el=$(s);el.classList.remove('on');el.style.display=s==='loadmsg'?'none':''});$(id).classList.add('on');if(id==='loadmsg')$(id).style.display=''}
-function go(id){show(id);window.scrollTo({top:0,behavior:'smooth'});if(id==='sC')requestAnimationFrame(resizeCanvas)}
+function show(id){['loadmsg','sA','sB','sC','sok','sdq','sbad'].forEach(s=>{const el=$(s);el.classList.remove('on');el.style.display=s==='loadmsg'?'none':''});$(id).classList.add('on');if(id==='loadmsg')$(id).style.display=''}
+const checkedCriteria=()=>[...document.querySelectorAll('input[name=c]:checked')].map(el=>el.value);
+async function go(id){
+  // An attestation with no criteria checked isn't valid, so don't let the
+  // clinician walk into the signature step and sign one — catching it after
+  // they've signed is too late to be useful.
+  if(id==='sC'&&!checkedCriteria().length){
+    const answer=await PADisqualify.confirmNoCriteria({recipients:DQ_RECIPIENTS});
+    if(answer!=='disqualify')return;
+    return openDisqualify();
+  }
+  show(id);window.scrollTo({top:0,behavior:'smooth'});if(id==='sC')requestAnimationFrame(resizeCanvas);
+}
 
 function isoToMask(iso){const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(iso||'');return m?`${m[2]}/${m[3]}/${m[1]}`:iso||''}
 function fmtTime(hhmm){if(!hhmm)return'';const[h,m]=hhmm.split(':').map(Number);return`${((h+11)%12)+1}:${String(m).padStart(2,'0')} ${h>=12?'PM':'AM'}`}
@@ -235,6 +263,17 @@ const fileUrl = which => `/api/yvy/file?role=visit&which=${which}&t=${encodeURIC
   if(record.status==='completed'){
     const link=record.completion&&record.completion.pdf ? fileUrl('pdf') : null;
     $('warnbox').innerHTML='<div class="warn">This attestation was already completed.'+(link?` <a href="${link}" target="_blank" rel="noopener">View the signed PDF.</a>`:'')+' Submitting again will replace it.</div>';
+    // A signed attestation can't be walked back through this form (the API
+    // refuses it), so don't offer the button.
+    $('dqcta').style.display='none';
+  } else if(record.status==='not_qualified'&&record.disqualification){
+    // Marking a patient as not qualifying is deliberately reversible — a
+    // misclick is undone by simply completing the attestation.
+    const d=record.disqualification;
+    $('warnbox').innerHTML='<div class="dqwarn">This visit was marked <b>does not qualify</b> on '+
+      esc(new Date(d.at).toLocaleString())+' by '+esc(d.provider)+'.<br>Reason: '+esc(d.reasonLabel)+
+      (d.notes?' — '+esc(d.notes):'')+
+      '<br>Completing the attestation below will replace that.</div>';
   }
 
   // Pre-check clinician criteria boxes based on the intake-time eligibility
@@ -311,12 +350,49 @@ $('sigdate').value=todayMask();
 function showErr(m){const e=$('errmsg');e.textContent=m;e.style.display='block';e.scrollIntoView({behavior:'smooth',block:'center'})}
 function clearErr(){$('errmsg').style.display='none'}
 
+// ── DOES NOT QUALIFY ────────────────────────────────────────────
+// Collects a provider + reason and notifies the office and Yeled V'Yalda.
+// No PDF is generated — nothing is being attested to. The shared prompt lives
+// in /disqualify.js so this asks exactly what the Stand Out form asks.
+async function openDisqualify(){
+  if(!record) return;
+  const s=record.submission||{};
+  const done=await PADisqualify.open({
+    patientName:record.firstName+' '+record.lastName,
+    patientDob:record.dob,
+    examDate:s.visitDate||'',
+    provider:selProvider,
+    recipients:DQ_RECIPIENTS,
+    submit:async payload=>{
+      const res=await fetch('/api/yvy/disqualify',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({...payload,t:token})});
+      const data=await res.json().catch(()=>({error:'Invalid server response'}));
+      if(!res.ok||data.error)throw new Error(data.error||'Submission failed');
+      // The record is saved either way; only the email may have failed.
+      if(data.emailed===false){
+        $('dqmsg').textContent='The outcome was recorded, but the notification email could not be sent. Please let the office know directly.';
+      }
+    }
+  });
+  if(!done) return; // cancelled — leave the form exactly as it was
+  submitted=true;    // outcome is saved — release the unsaved-work guard
+  show('sdq');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
 async function doSubmit(){
   clearErr();
+  const checked=checkedCriteria();
+  // Safety net for the same rule go() enforces — an attestation must never be
+  // submitted with an empty criteria list.
+  if(!checked.length){
+    const answer=await PADisqualify.confirmNoCriteria({recipients:DQ_RECIPIENTS});
+    if(answer!=='disqualify') return show('sB');
+    return openDisqualify();
+  }
   if(!selProvider) return showErr('Please select a provider before submitting.');
   if(!hasSig) return showErr('Provider signature is required.');
 
-  const checked=[...document.querySelectorAll('input[name=c]:checked')].map(el=>el.value);
   const date=maskToIso($('sigdate').value)||maskToIso(todayMask());
   const signature=canvas.toDataURL('image/png');
 

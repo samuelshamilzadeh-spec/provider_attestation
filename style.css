@@ -104,6 +104,42 @@ canvas{display:block;width:100%;height:180px;cursor:crosshair;touch-action:none;
 .okwrap h2{font-size:20px;font-weight:500;margin-bottom:8px}
 .okwrap p{font-size:14px;color:var(--mu);max-width:360px;margin:0 auto 1.5rem;line-height:1.6}
 
+/* ── DOES NOT QUALIFY ────────────────────────────────────────────
+   The escape hatch under the criteria list, plus the shared prompt it opens
+   (see /disqualify.js). Everything here is self-contained on purpose: the
+   Stand Out page loads only this stylesheet, never yvy.css. */
+.dq-cta{margin-top:1.5rem;padding-top:1.25rem;border-top:1px solid #F1F5F9;text-align:center}
+/* Deliberately quiet — findable, but never competing with "Next". */
+.dq-link{font-family:var(--font);font-size:13px;font-weight:500;color:var(--mu);background:#fff;border:1px solid var(--bd);border-radius:var(--r);padding:11px 18px;cursor:pointer;transition:all .15s;min-height:42px;width:100%;-webkit-tap-highlight-color:transparent}
+.dq-link:hover{background:var(--er-bg);border-color:#FCA5A5;color:var(--er)}
+.dq-note{font-size:11.5px;color:var(--lt);margin-top:8px;line-height:1.5}
+
+.dq-locked{overflow:hidden}
+.dq-ov{position:fixed;inset:0;z-index:200;background:rgba(15,25,35,.5);display:flex;align-items:center;justify-content:center;padding:1.25rem;overflow-y:auto}
+.dq-ov[hidden]{display:none}
+.dq-modal{background:var(--wh);border-radius:var(--rl);width:100%;max-width:460px;padding:1.75rem;margin:auto;box-shadow:0 24px 60px rgba(15,23,35,.24)}
+.dq-title{font-size:18px;font-weight:500;color:var(--tx);line-height:1.35;margin-bottom:8px}
+.dq-sub{font-size:13px;color:var(--mu);line-height:1.6}
+.dq-who{background:#F0F4F8;border:1px solid #DCE5F0;border-radius:var(--r);padding:10px 14px;margin-top:1.1rem;font-size:13.5px;color:var(--navy)}
+.dq-who strong{font-weight:500}
+.dq-who span{color:var(--mu);font-size:12.5px}
+.dq-body{margin-top:1.25rem}
+.dq-f{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.dq-f:last-child{margin-bottom:0}
+.dq-f label{font-size:12.5px;font-weight:500;color:#334155}
+.dq-f select,.dq-f textarea{font-family:var(--font);font-size:16px;color:var(--tx);background:#fff;border:1px solid var(--bd);border-radius:var(--r);outline:none;width:100%;transition:border-color .15s,box-shadow .15s}
+.dq-f select{height:42px;padding:0 38px 0 12px;cursor:pointer;appearance:none;-webkit-appearance:none;-moz-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='none' stroke='%2364748B' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round' d='M1 1.5 6 6.5 11 1.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center}
+.dq-f textarea{padding:10px 12px;line-height:1.5;resize:vertical;min-height:76px}
+.dq-f select:focus,.dq-f textarea:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(24,56,102,.07)}
+.dq-f textarea::placeholder{color:#CBD5E1}
+.dq-err{display:none;font-size:13px;color:var(--er);background:var(--er-bg);border-radius:var(--r);padding:10px 14px;margin-top:14px;line-height:1.5}
+.dq-foot{display:flex;justify-content:flex-end;gap:10px;margin-top:1.5rem;padding-top:1.25rem;border-top:1px solid #F1F5F9}
+.dq-foot .btn:disabled{opacity:.45;cursor:not-allowed}
+
+/* Outcome banner shown on a visit already marked "not qualified". */
+.dqwarn{font-size:13px;color:#9F1239;background:#FFF1F2;border:1px solid #FECDD3;border-radius:var(--r);padding:10px 14px;line-height:1.6;margin-bottom:1rem}
+.dqwarn b{font-weight:500}
+
 /* RESPONSIVE — TABLET */
 @media(max-width:640px){
   body{padding:1rem .75rem 4rem}
@@ -131,6 +167,11 @@ canvas{display:block;width:100%;height:180px;cursor:crosshair;touch-action:none;
   .nav>div:empty{display:none}
   .ci{padding:10px 6px}
   .sigfoot{justify-content:space-between}
+  /* Same stacking as .nav — primary action on top, thumb-reachable. */
+  .dq-ov{padding:.75rem;align-items:flex-start}
+  .dq-modal{padding:1.25rem}
+  .dq-foot{flex-direction:column-reverse;align-items:stretch}
+  .dq-foot .btn{width:100%;text-align:center}
 }
 
 @media(max-width:380px){

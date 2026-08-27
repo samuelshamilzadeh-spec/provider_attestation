@@ -12,6 +12,10 @@ Vercel deployment.
 4. `/api/submit` dispatches the `generate-attestation.yml` GitHub Action,
    which fills the PDF and emails it (SMTP secrets live in GitHub).
 
+If the member doesn't qualify, the clinician takes the **does-not-qualify**
+path instead (see below) — `/api/disqualify` emails the office and no Action is
+dispatched.
+
 ## Flow 2 — Yeled V'Yalda (parent company)
 
 1. **Staff intake — `/yvy/intake`** — two modes:
@@ -50,6 +54,55 @@ Vercel deployment.
    once the clinician finishes. Best-effort — a Sheets outage never blocks a
    visit from being scheduled or completed.
 
+## Patient does not qualify (both flows)
+
+Not every visit ends in an attestation. Both clinician forms carry the same
+escape hatch, driven by one shared prompt (`/disqualify.js`) so they ask for
+exactly the same things:
+
+- **Explicit** — a *"This patient does not qualify"* button sits under the
+  criteria list on the criteria step.
+- **Detected** — pressing *Next: Provider & sign* (or *Submit*) with **zero**
+  criteria checked opens the same prompt first: *Go back and review* or
+  *Patient does not qualify*. An attestation can no longer be signed with an
+  empty criteria list, which the forms previously allowed.
+
+Either path opens one dialog asking for **provider**, **exam date** (prefilled with
+the scheduled visit date, or today on the Stand Out form), a **reason** from a
+fixed list, and optional **notes** (required for *Other*). No signature is
+collected and **no PDF is generated** — nothing is being attested to.
+
+The reason list lives in `lib/disqualify.js` (server, authoritative) and is
+mirrored in `/disqualify.js` for display; the server always re-resolves the
+submitted code to its own label.
+
+| | Stand Out Care | Yeled V'Yalda |
+| --- | --- | --- |
+| Endpoint | `/api/disqualify` | `/api/yvy/disqualify` |
+| Emails | `OFFICE_EMAIL` | `OFFICE_EMAIL` + `YVY_EMAIL` |
+| Teams | yes (`TEAMS_WEBHOOK_URL`) | yes |
+| Stored | nothing (no record in this flow) | visit → `not_qualified` |
+| Sheet row | — | status `Not Qualified` + reason |
+
+`DISQUALIFIED_EMAIL`, if set, overrides the recipients for **both** flows.
+The email carries patient name, DOB, exam date, provider, reason and notes —
+but deliberately **no link**, since it reaches Yeled V'Yalda and the clinician
+visit token must never leave the office's inbox.
+
+**Reversibility.** Marking a YVY visit not-qualified is undoable: the visit
+link keeps working and shows a banner naming who marked it, when, and why.
+Any later outcome supersedes it (`supersedeDisqualification()`) — completing
+the attestation, or the patient re-booking through their own still-valid link
+after a no-show. The flag is cleared, the previous one is kept under
+`priorDisqualifications` for audit, and the row reads `Completed` /
+`Scheduled` with no stale reason beside it. The reverse is blocked: once an
+attestation is **signed**, the button is hidden and the endpoint returns `409`
+— voiding a signed legal document is an office matter, not a web-form one.
+
+If the notification email fails, the YVY outcome is still saved and the success
+screen says the email didn't go out. The Stand Out flow has no record to fall
+back on, so a send failure returns `502` and the provider can retry.
+
 ### Links & access control
 
 Each visit issues **three independent, unguessable role tokens** — never the
@@ -71,7 +124,8 @@ record id are never serialized to the browser.
 
 Records, card photos, and completed PDFs are stored in Vercel Blob.
 Records live at `yvy/records/<internalId>.json` (statuses
-`sent → scheduled → completed`); each token maps to its record + role via a
+`sent → scheduled → completed`, or `not_qualified` when the clinician records
+that the patient doesn't qualify); each token maps to its record + role via a
 tiny index blob at `yvy/tok/<token>.json`.
 
 ### Environment variables (Vercel project)
@@ -83,6 +137,7 @@ tiny index blob at `yvy/tok/<token>.json`.
 | `SMTP_USER`, `SMTP_PASS` | Gmail SMTP (same creds as the GitHub Action secrets) |
 | `OFFICE_EMAIL` | office inbox for new-visit notifications |
 | `YVY_EMAIL` | Yeled V'Yalda inbox for completed-attestation notifications |
+| `DISQUALIFIED_EMAIL` | optional — overrides the recipients for "did not qualify" notices (defaults to the inboxes above) |
 | `TEAMS_WEBHOOK_URL` | optional — Teams incoming webhook / Workflows URL |
 | `GOOGLE_SHEETS_CLIENT_EMAIL` | service account email (`…@…iam.gserviceaccount.com`) |
 | `GOOGLE_SHEETS_PRIVATE_KEY` | service account private key (PEM, with `\n`s) |
@@ -93,6 +148,12 @@ tiny index blob at `yvy/tok/<token>.json`.
 
 - **Lead entity names** — edit `window.YVY_LEAD_ENTITIES` in `yvy/config.js`
   (exact spellings appear on the legal form header).
+- **Does-not-qualify reasons** — `DISQUALIFY_REASONS` in `lib/disqualify.js`;
+  mirror any edit in the `REASONS` array at the top of `/disqualify.js`.
+- The Google Sheet gained two columns (`Not Qualified At`, `Not Qualified
+  Reason`) appended after `Link Opened At`. `Visit ID` stays in column W, so
+  existing rows still match; the header row is rewritten automatically on the
+  next sync.
 - **Visit hours / slot length** — `yvy/config.js` (client) must match
   `WINDOW` / `SLOT_MINUTES` in `api/yvy/patient-submit.js` (server).
 - Providers + facility info — `lib/attestation_pdf.js`.

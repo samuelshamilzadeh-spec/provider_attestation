@@ -1,5 +1,6 @@
 import { assertBlobConfigured, loadRecordByToken, saveRecord, uploadDataUrl, siteOrigin } from '../../lib/store.js';
 import { validSlot, validPhone, notifyOffice } from '../../lib/visit.js';
+import { supersedeDisqualification } from '../../lib/disqualify.js';
 import { syncVisitRow } from '../../lib/sheets.js';
 
 export const config = { api: { bodyParser: { sizeLimit: '4mb' } } };
@@ -64,6 +65,11 @@ export default async function handler(req, res) {
     ]);
 
     record.status = 'scheduled';
+    // The patient link stays valid after a clinician marks the visit "does not
+    // qualify" (a no-show, say), so this can be a re-booking. The new booking
+    // supersedes that outcome — otherwise the row would read Scheduled while
+    // still carrying the old reason.
+    supersedeDisqualification(record);
     record.submission = {
       submittedAt: new Date().toISOString(),
       source: 'patient',

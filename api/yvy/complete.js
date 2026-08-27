@@ -1,6 +1,7 @@
 import { assertBlobConfigured, loadRecordByToken, saveRecord, uploadBuffer, siteOrigin } from '../../lib/store.js';
 import { sendMail, renderEmail } from '../../lib/notify.js';
 import { generateAttestationPdf } from '../../lib/attestation_pdf.js';
+import { supersedeDisqualification } from '../../lib/disqualify.js';
 import { syncVisitRow } from '../../lib/sheets.js';
 
 export const config = { api: { bodyParser: { sizeLimit: '4mb' } } };
@@ -68,6 +69,10 @@ export default async function handler(req, res) {
       cin: cin || '',
       pdfUrl
     };
+    // A visit can be marked "does not qualify" and then completed anyway — the
+    // link stays open on purpose so a misclick is undone by just finishing the
+    // attestation. The signed PDF supersedes that earlier outcome.
+    supersedeDisqualification(record);
     await saveRecord(record);
 
     // Docs link carries the DOCS token and is only ever sent to Yeled V'Yalda.

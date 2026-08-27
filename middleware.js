@@ -6,9 +6,9 @@
 export const config = { matcher: '/:path*' };
 
 const YVY_HOST = 'partners.premierassist.com';
-// style.css is shared by both the Stand Out and YVY pages; everything else the
-// YVY pages need lives under /yvy/ or /api/yvy/.
-const SHARED_PATHS = new Set(['/style.css']);
+// style.css and disqualify.js are shared by both the Stand Out and YVY pages;
+// everything else the YVY pages need lives under /yvy/ or /api/yvy/.
+const SHARED_PATHS = new Set(['/style.css', '/disqualify.js']);
 
 export default function middleware(request) {
   const host = (request.headers.get('host') || '').split(':')[0].toLowerCase();

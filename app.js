@@ -1,13 +1,23 @@
 let cur = 1, selProvider = '', hasSig = false;
 
+const checkedCriteria = () => [...document.querySelectorAll('input[name=c]:checked')].map(el=>el.value);
+
 // ── NAVIGATION ─────────────────────────────────────────────────
-function go(n) {
+async function go(n) {
   if (cur === 1 && n === 2) {
     const fn = document.getElementById('mfirst').value.trim();
     const ln = document.getElementById('mlast').value.trim();
     const dob = document.getElementById('mdob').value;
     if (!fn || !ln) { mark('mfirst', !fn); mark('mlast', !ln); return; }
     if (!isValidDate(dob)) { mark('mdob', true); return; }
+  }
+  // An attestation with no criteria checked isn't valid, so don't let the
+  // provider walk into the signature step and sign one. Catch it here rather
+  // than at submit — after they've already signed is too late to be useful.
+  if (cur === 2 && n === 3 && !checkedCriteria().length) {
+    const answer = await PADisqualify.confirmNoCriteria();
+    if (answer !== 'disqualify') return;
+    return openDisqualify();
   }
   document.getElementById('s'+cur).classList.remove('on');
   cur = n;
@@ -168,9 +178,50 @@ function normalizeDob(raw) {
 function showErr(msg){const e=document.getElementById('errmsg');e.textContent=msg;e.style.display='block';e.scrollIntoView({behavior:'smooth',block:'center'})}
 function clearErr(){document.getElementById('errmsg').style.display='none'}
 
+// ── DOES NOT QUALIFY ────────────────────────────────────────────
+// Collects a provider + reason and emails the office. No PDF, no Action
+// dispatch — nothing is being attested to. The shared prompt lives in
+// /disqualify.js so this asks exactly what the YVY visit form asks.
+async function openDisqualify() {
+  const firstName = document.getElementById('mfirst').value.trim();
+  const lastName  = document.getElementById('mlast').value.trim();
+  const memberName = (firstName+' '+lastName).trim();
+  const dob = maskToIso(document.getElementById('mdob').value);
+  // Step 1 gates on these, so this only trips if it's opened out of order.
+  if (!memberName || !dob) return go(1);
+
+  const done = await PADisqualify.open({
+    patientName: memberName,
+    patientDob: dob,
+    provider: selProvider,
+    submit: async (payload) => {
+      const res = await fetch('/api/disqualify', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({...payload, memberName, firstName, lastName, dob})
+      });
+      const data = await res.json().catch(()=>({error:'Invalid server response'}));
+      if (!res.ok || data.error) throw new Error(data.error || 'Submission failed');
+    }
+  });
+  if (!done) return; // cancelled — leave the form exactly as it was
+
+  document.getElementById('s'+cur).classList.remove('on');
+  document.getElementById('sdq').classList.add('on');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
 // ── SUBMIT ──────────────────────────────────────────────────────
 async function doSubmit() {
   clearErr();
+  const checked = checkedCriteria();
+  // Safety net for the same rule go() enforces — an attestation must never be
+  // submitted with an empty criteria list.
+  if (!checked.length) {
+    const answer = await PADisqualify.confirmNoCriteria();
+    if (answer !== 'disqualify') return go(2);
+    return openDisqualify();
+  }
   if (!selProvider) return showErr('Please select a provider before submitting.');
   if (!hasSig) return showErr('Provider signature is required.');
 
@@ -181,7 +232,6 @@ async function doSubmit() {
   const cin  = document.getElementById('mcin').value;
   const date = maskToIso(document.getElementById('sigdate').value) || maskToIso(todayMask());
   if (!dob) return showErr('Please enter a valid date of birth (MM/DD/YYYY).');
-  const checked = [...document.querySelectorAll('input[name=c]:checked')].map(el=>el.value);
   const signature = canvas.toDataURL('image/png');
 
   const btn = document.getElementById('subbtn');
@@ -211,6 +261,7 @@ async function doSubmit() {
 // ── RESET ────────────────────────────────────────────────────────
 function reset() {
   document.getElementById('sok').classList.remove('on');
+  document.getElementById('sdq').classList.remove('on');
   document.querySelectorAll('input[type=text],input[type=date]').forEach(el=>el.value='');
   document.getElementById('sigdate').value = todayMask();
   document.querySelectorAll('input[name=c]').forEach(el=>el.checked=false);
